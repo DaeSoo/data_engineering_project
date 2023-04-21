@@ -2,5 +2,28 @@ spring:
   profiles:
     active: dev
 
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://192.168.2.136:5432/apiserver
+    username: server_admin
+    password: whdydwns
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create
+    #  naming-strategy: org.hibernate.cfg.ImprovedNamingStrategy
+    #generate-ddl: true
+    show-sql: false
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+        globally_quoted_identifiers_skip_column_definitions: true
+        format_sql: true
+        #default_batch_fetch_size: 10
+        type:
+          descripter:
+            sql: trace
+
 server:
   port: 20000
