@@ -31,7 +31,6 @@ public class AccountController {
 
                     )
 
-                    .header("X-Riot-Token","RGAPI-579cb263-6c34-4137-9870-b4d30800092b")
                     .retrieve()
                     .bodyToMono(String.class);
             response.subscribe(value -> log.info(value));
@@ -39,7 +38,6 @@ public class AccountController {
                         webClient.get()
                         .uri(uriBuilder -> uriBuilder.path("/lol/league/v4/entries/{queue}/{tier}/{division}")
                                 .build("RANKED_SOLO_5x5","PLATINUM","IV"))
-                        .header("X-Riot-Token","RGAPI-579cb263-6c34-4137-9870-b4d30800092b")
                         .retrieve()
                         .onStatus(
                                 HttpStatus.INTERNAL_SERVER_ERROR::equals,
