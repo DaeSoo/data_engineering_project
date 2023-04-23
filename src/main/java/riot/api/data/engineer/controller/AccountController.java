@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/collect/account/info")
+@RequestMapping(value = "/account")
 public class AccountController {
     private final WebClient webClient;
     public AccountController()
