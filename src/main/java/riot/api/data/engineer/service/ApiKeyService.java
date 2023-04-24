@@ -1,5 +1,7 @@
 package riot.api.data.engineer.service;
 
-public interface ApiKeyService {
+import riot.api.data.engineer.entity.api.ApiKey;
 
+public interface ApiKeyService {
+    public ApiKey findOne();
 }
