@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
 @Repository
-public class ApiParamsRepository {
+public class UserInfoQueryRepository {
     private final JPAQueryFactory queryFactory;
 
 }
