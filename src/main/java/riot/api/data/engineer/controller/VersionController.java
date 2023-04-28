@@ -37,7 +37,7 @@ public class VersionController {
 
         ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
 
-        String uri = new UtilManager().getStringConcat(apiInfo.getApiPrefix(),apiInfo.getApiUrl());
+        String uri = new UtilManager().getStringConcat(apiInfo.getApiHost(),apiInfo.getApiUrl());
 
         String response = webClient.get().uri(uri).retrieve().bodyToMono(String.class).block();
 

@@ -37,7 +37,7 @@ public class SpellsController {
 
         ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
 
-        String uri = new UtilManager().getStringConcat(apiInfo.getApiPrefix(),apiInfo.getApiUrl());
+        String uri = new UtilManager().getStringConcat(apiInfo.getApiHost(),apiInfo.getApiUrl());
 
         Version version = versionService.findOneByName();
 

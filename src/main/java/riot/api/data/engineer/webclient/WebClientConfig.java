@@ -14,6 +14,8 @@ import io.netty.channel.ChannelOption;
         import reactor.core.publisher.Mono;
         import reactor.netty.http.client.HttpClient;
 
+import java.net.URI;
+
 @Configuration
 @Slf4j
 public class WebClientConfig {
@@ -57,6 +59,7 @@ public class WebClientConfig {
                         ExchangeFilterFunction.ofResponseProcessor(
                                 clientResponse -> {
                                     log.info(">>>>>>>>>> RESPONSE <<<<<<<<<<");
+                                    log.info("Status Code : " + clientResponse.statusCode());
                                     clientResponse.headers().asHttpHeaders().forEach((name, values) -> values.forEach(value -> log.info("{} : {}", name, value)));
                                     return Mono.just(clientResponse);
                                 }
@@ -67,4 +70,6 @@ public class WebClientConfig {
                 .defaultCookie("httpclient-type", "webclient")
                 .build();
     }
+
+
 }
