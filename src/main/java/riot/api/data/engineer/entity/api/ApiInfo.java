@@ -4,7 +4,6 @@ package riot.api.data.engineer.entity.api;
 import lombok.Getter;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Getter
 @Entity(name = "api_info")
@@ -20,8 +19,12 @@ public class ApiInfo {
     /** 호출 url **/
     @Column(name = "api_url")
     String apiUrl;
-    @Column(name = "api_prefix")
-    private String apiPrefix;
+
+    @Column(name = "api_scheme")
+    private String apiScheme;
+
+    @Column(name = "api_host")
+    private String apiHost;
     /** 설명 **/
     @Column(name = "description")
     String description;

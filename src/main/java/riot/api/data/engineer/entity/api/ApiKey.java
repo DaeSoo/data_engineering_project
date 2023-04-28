@@ -19,4 +19,8 @@ public class ApiKey {
 
     @Column(name = "use_yn")
     private Boolean useYn;
+
+    @Column(name = "key_name")
+    String keyName;
+
 }
