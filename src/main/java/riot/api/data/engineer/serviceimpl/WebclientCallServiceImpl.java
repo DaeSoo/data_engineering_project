@@ -18,7 +18,29 @@ public class WebclientCallServiceImpl implements WebclientCallService {
 
 
     @Override
-    public String webclientGet(WebClient webClient, WebClientDTO webClientDTO) {
+    public String webclientGet(WebClientDTO webClientDTO) {
+        return webClient.get().uri(uriBuilder -> uriBuilder
+                .scheme(webClientDTO.getScheme())
+                .host(webClientDTO.getHost())
+                .path(webClientDTO.getPath())
+                .build()).retrieve().bodyToMono(String.class).block();
+    }
+
+    @Override
+    public String webclientGetWithVersion(WebClientDTO webClientDTO, String version) {
+        return webClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .scheme(webClientDTO.getScheme())
+                        .host(webClientDTO.getHost())
+                        .path(webClientDTO.getPath())
+                        .build(version))
+                .retrieve().bodyToMono(String.class).block();
+    }
+
+
+    @Override
+    public String webclientGetWithParam(WebClient webClient, WebClientDTO webClientDTO) {
         return webClient.get().uri(uriBuilder -> uriBuilder
                 .scheme(webClientDTO.getScheme())
                 .host(webClientDTO.getHost())
@@ -28,7 +50,7 @@ public class WebclientCallServiceImpl implements WebclientCallService {
     }
 
     @Override
-    public String webclientGetWithToken(WebClientDTO webClientDTO, ApiKey apikey) {
+    public String webclientGetWithTokenWithPageParam(WebClientDTO webClientDTO, ApiKey apikey) {
         return webClient.get().uri(uriBuilder -> uriBuilder
                 .scheme(webClientDTO.getScheme())
                 .host(webClientDTO.getHost())
@@ -36,6 +58,5 @@ public class WebclientCallServiceImpl implements WebclientCallService {
                 .queryParamIfPresent("page", Optional.ofNullable(webClientDTO.getQueryParam().get("page")))
                 .build()).header(apikey.getKeyName(), apikey.getApiKey()).retrieve().bodyToMono(String.class).block();
     }
-
 
 }

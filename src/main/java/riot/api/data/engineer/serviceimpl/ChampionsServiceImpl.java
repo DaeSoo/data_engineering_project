@@ -4,17 +4,30 @@ package riot.api.data.engineer.serviceimpl;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.springframework.stereotype.Service;
+import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.Champions;
 import riot.api.data.engineer.entity.Data;
-import riot.api.data.engineer.service.CollectDragonService;
+import riot.api.data.engineer.entity.Version;
+import riot.api.data.engineer.entity.api.ApiInfo;
+import riot.api.data.engineer.service.ChampionsService;
+import riot.api.data.engineer.service.WebclientCallService;
+import riot.api.data.engineer.utils.UtilManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class CollectDragonServiceImpl implements CollectDragonService {
+public class ChampionsServiceImpl implements ChampionsService {
+    private final WebclientCallService webclientCallService;
+
+    public ChampionsServiceImpl(WebclientCallService webclientCallService) {
+        this.webclientCallService = webclientCallService;
+    }
+
     @Override
-    public Champions setChampions(JsonObject jsonObject){
+    public Champions setChampions(String response){
+        JsonObject jsonObject = new UtilManager().StringToJsonObject(response);
+
         Champions champions = new Champions();
         Gson gson = new Gson();
 
@@ -33,5 +46,12 @@ public class CollectDragonServiceImpl implements CollectDragonService {
         champions.setDataList(dataList);
 
         return champions;
+    }
+
+    @Override
+    public String getChampionsInfo(ApiInfo apiInfo, Version version) {
+        WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(),apiInfo.getApiHost(),apiInfo.getApiUrl());
+
+        return webclientCallService.webclientGetWithVersion(webClientDTO,version.getVersion());
     }
 }

@@ -6,7 +6,10 @@ import riot.api.data.engineer.entity.api.ApiKey;
 
 public interface WebclientCallService {
 
-    String webclientGet(WebClient webClient, WebClientDTO webClientDTO);
+    String webclientGet(WebClientDTO webClientDTO);
+    String webclientGetWithVersion(WebClientDTO webClientDTO, String version);
 
-    String webclientGetWithToken(WebClientDTO webClientDTO, ApiKey apikey);
+    String webclientGetWithParam(WebClient webClient, WebClientDTO webClientDTO);
+
+    String webclientGetWithTokenWithPageParam(WebClientDTO webClientDTO, ApiKey apikey);
 }
