@@ -1,8 +1,10 @@
 package riot.api.data.engineer.entity;
 
+import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
@@ -10,11 +12,19 @@ import javax.persistence.Id;
 @Setter
 @Getter
 public class UserInfoDetail {
+    @Column(name="id")
     String id;
+    @Column(name="account_id")
     String accountId;
     @Id
+    @Column(name="puuid")
     String puuid;
+    @Column(name="name")
     String name;
+    @Column(name="revision_date")
     String revisionDate;
-    String SummonerLevel;
+    @Column(name="summoner_level")
+    String summonerLevel;
+    @Column(name="profile_icon_id")
+    String profileIconId;
 }
