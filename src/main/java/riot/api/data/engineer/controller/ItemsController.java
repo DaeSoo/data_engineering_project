@@ -1,17 +1,17 @@
 package riot.api.data.engineer.controller;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.WebClient;
+import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.Version;
 import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.service.ApiInfoService;
 import riot.api.data.engineer.service.VersionService;
+import riot.api.data.engineer.service.WebclientCallService;
 import riot.api.data.engineer.utils.UtilManager;
 
 @Slf4j
@@ -19,15 +19,14 @@ import riot.api.data.engineer.utils.UtilManager;
 @RequestMapping(value = "/ddragon/items")
 public class ItemsController {
 
-    private WebClient webClient;
     private final ApiInfoService apiInfoService;
-
     private final VersionService versionService;
+    private final WebclientCallService webclientCallService;
 
-    public ItemsController(WebClient webClient, ApiInfoService apiInfoService, VersionService versionService){
-        this.webClient = webClient;
+    public ItemsController(ApiInfoService apiInfoService, VersionService versionService, WebclientCallService webclientCallService){
         this.apiInfoService = apiInfoService;
         this.versionService = versionService;
+        this.webclientCallService = webclientCallService;
     }
 
     @GetMapping("/get")
@@ -37,18 +36,16 @@ public class ItemsController {
 
         ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
 
-        String uri = new UtilManager().getStringConcat(apiInfo.getApiHost(),apiInfo.getApiUrl());
-
         Version version = versionService.findOneByName();
 
-        if(!StringUtils.isEmpty(uri) && !StringUtils.isEmpty(version.getVersion())){
-            String response = webClient.get().uri(uri,version.getVersion()).retrieve().bodyToMono(String.class).block();
-            Gson gson = new Gson();
-            JsonObject jsonObject = gson.fromJson(response, JsonObject.class);
+        String response = webclientCallService.webclientGetWithVersion(new WebClientDTO(apiInfo.getApiScheme(),apiInfo.getApiHost(),apiInfo.getApiUrl()),version.getVersion());
 
-            return jsonObject;
+        JsonObject itemResult = new UtilManager().StringToJsonObject(response);
 
-        }else{
+        if(!ObjectUtils.isEmpty(itemResult)){
+            return itemResult;
+        }
+        else{
             return null;
         }
     }

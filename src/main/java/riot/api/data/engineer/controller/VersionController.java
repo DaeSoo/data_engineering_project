@@ -1,6 +1,5 @@
 package riot.api.data.engineer.controller;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import lombok.extern.slf4j.Slf4j;
@@ -8,10 +7,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
+import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.Version;
 import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.service.ApiInfoService;
 import riot.api.data.engineer.service.VersionService;
+import riot.api.data.engineer.service.WebclientCallService;
 import riot.api.data.engineer.utils.UtilManager;
 
 import java.util.ArrayList;
@@ -22,14 +23,16 @@ import java.util.List;
 @RequestMapping(value = "/ddragon/version")
 public class VersionController {
     private final ApiInfoService apiInfoService;
-    private WebClient webClient;
+    private final WebclientCallService webclientCallService;
     private final VersionService versionService;
+
     public VersionController(ApiInfoService apiInfoService,
-                             WebClient webClient, VersionService versionService){
+                             WebclientCallService webclientCallService, VersionService versionService) {
         this.apiInfoService = apiInfoService;
-        this.webClient = webClient;
+        this.webclientCallService = webclientCallService;
         this.versionService = versionService;
     }
+
     @GetMapping("/get")
     public List<Version> getVersion() {
         /** yml에서 관리하는 것으로 변경 예정**/
@@ -37,27 +40,22 @@ public class VersionController {
 
         ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
 
-        String uri = new UtilManager().getStringConcat(apiInfo.getApiHost(),apiInfo.getApiUrl());
+        String response = webclientCallService.webclientGet(new WebClientDTO(apiInfo.getApiScheme(), apiInfo.getApiHost(), apiInfo.getApiUrl()));
 
-        String response = webClient.get().uri(uri).retrieve().bodyToMono(String.class).block();
+        JsonArray jsonArrayResponse = new UtilManager().StringToJsonArray(response);
 
-        Gson gson = new Gson();
-        JsonArray jsonArrayResponse = gson.fromJson(response, JsonArray.class);
         List<Version> versionList = new ArrayList<>();
 
-        for(JsonElement jsonElement : jsonArrayResponse){
+        for (JsonElement jsonElement : jsonArrayResponse) {
             String versionString = jsonElement.getAsString();
-            boolean currentVersionYn = false;
-            if(versionString.equals(jsonArrayResponse.get(0).getAsString())){
-                currentVersionYn = true;
-            }
-            Version version = new Version(versionString,currentVersionYn);
+            boolean currentVersionYn = versionString.equals(jsonArrayResponse.get(0).getAsString());
+            Version version = new Version(versionString, currentVersionYn);
             versionList.add(version);
         }
 
-        try{
+        try {
             versionService.save(versionList);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.info(e.getMessage());
         }
 

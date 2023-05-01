@@ -11,10 +11,12 @@ import java.util.List;
 public class ApiInfoServiceImpl implements ApiInfoService {
 
     private final ApiInfoQueryRepository apiInfoQueryRepository;
-    protected ApiInfoServiceImpl(ApiInfoQueryRepository apiInfoQueryRepository){
+
+    protected ApiInfoServiceImpl(ApiInfoQueryRepository apiInfoQueryRepository) {
         this.apiInfoQueryRepository = apiInfoQueryRepository;
     }
-    public ApiInfo findOneByName(String apiName){
+
+    public ApiInfo findOneByName(String apiName) {
         return apiInfoQueryRepository.findOneByName(apiName);
     }
 

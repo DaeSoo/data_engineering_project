@@ -1,35 +1,37 @@
 package riot.api.data.engineer.controller;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
+import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.Champions;
 import riot.api.data.engineer.entity.Version;
 import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.service.ApiInfoService;
-import riot.api.data.engineer.service.CollectDragonService;
+import riot.api.data.engineer.service.ChampionsService;
 import riot.api.data.engineer.service.VersionService;
-import riot.api.data.engineer.utils.UtilManager;
+import riot.api.data.engineer.service.WebclientCallService;
 
 @Slf4j
 @RestController
 @RequestMapping(value = "/ddragon/champions")
 public class ChampionsController {
 
-    private final CollectDragonService collectDragonService;
+    private final ChampionsService championsService;
     private WebClient webClient;
+
+    private final WebclientCallService webclientCallService;
     private final ApiInfoService apiInfoService;
 
     private final VersionService versionService;
 
-    public ChampionsController(CollectDragonService collectDragonService, WebClient webClient, ApiInfoService apiInfoService, VersionService versionService){
-        this.collectDragonService = collectDragonService;
+    public ChampionsController(ChampionsService championsService, WebClient webClient, WebclientCallService webclientCallService, ApiInfoService apiInfoService, VersionService versionService){
+        this.championsService = championsService;
         this.webClient = webClient;
+        this.webclientCallService = webclientCallService;
         this.apiInfoService = apiInfoService;
         this.versionService = versionService;
     }
@@ -41,18 +43,16 @@ public class ChampionsController {
 
         ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
 
-        String uri = new UtilManager().getStringConcat(apiInfo.getApiHost(),apiInfo.getApiUrl());
-
         Version version = versionService.findOneByName();
 
-        if(!StringUtils.isEmpty(uri) && !StringUtils.isEmpty(version.getVersion())){
-            String response = webClient.get().uri(uri,version.getVersion()).retrieve().bodyToMono(String.class).block();
-            Gson gson = new Gson();
-            JsonObject jsonObject = gson.fromJson(response, JsonObject.class);
-            Champions champions = collectDragonService.setChampions(jsonObject);
+        String response = webclientCallService.webclientGetWithVersion(new WebClientDTO(apiInfo.getApiScheme(),apiInfo.getApiHost(),apiInfo.getApiUrl()),version.getVersion());
 
-            return champions;
-        }else{
+        Champions champions = championsService.setChampions(response);
+
+       if(!ObjectUtils.isEmpty(champions)){
+           return champions;
+        }
+       else{
             return null;
         }
     }

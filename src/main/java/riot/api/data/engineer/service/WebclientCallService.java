@@ -4,13 +4,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.api.ApiKey;
 
-import java.util.Map;
-
 public interface WebclientCallService {
 
-    String webclientGet(WebClient webClient, WebClientDTO webClientDTO);
+    String webclientGet(WebClientDTO webClientDTO);
+    String webclientGetWithVersion(WebClientDTO webClientDTO, String version);
 
-    String webclientGetWithToken(WebClientDTO webClientDTO, ApiKey apikey);
+    String webclientGetWithParam(WebClient webClient, WebClientDTO webClientDTO);
 
-    String webclientQueryParamGet(WebClientDTO webClientDTO, ApiKey apikey, Map<String,String> queryParam);
+    String webclientGetWithTokenWithPageParam(WebClientDTO webClientDTO, ApiKey apikey);
 }

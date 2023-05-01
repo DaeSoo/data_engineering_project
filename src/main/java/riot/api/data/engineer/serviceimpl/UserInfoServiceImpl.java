@@ -3,6 +3,7 @@ package riot.api.data.engineer.serviceimpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import riot.api.data.engineer.dto.WebClientDTO;
@@ -48,14 +49,16 @@ public class UserInfoServiceImpl implements UserInfoService {
         }
     }
 
+    @Transactional
     protected void apiCallRepeat(ApiInfo apiInfo, ApiKey apiKey, int page){
         Gson gson = new Gson();
 
         while(true){
             Map<String,String> queryParam = new HashMap<>();
             queryParam.put("page",String.valueOf(page));
-            WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiHost(), apiInfo.getApiUrl(),queryParam);
-            String response = webclientCallService.webclientGetWithToken(webClientDTO,apiKey);
+            WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(),apiInfo.getApiHost(), apiInfo.getApiUrl(),queryParam);
+
+            String response = webclientCallService.webclientGetWithTokenWithPageParam(webClientDTO,apiKey);
             List<UserInfo> userInfoList = gson.fromJson(response, new TypeToken<List<UserInfo>>(){}.getType());
 
             if(CollectionUtils.isEmpty(userInfoList)){
@@ -66,7 +69,7 @@ public class UserInfoServiceImpl implements UserInfoService {
                 page++;
             }
             try {
-                Thread.sleep(5000);
+                Thread.sleep(1500);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

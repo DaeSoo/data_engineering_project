@@ -16,19 +16,18 @@ public class WebClientDTO {
 
     Map<String,String> queryParam;
 
-    public WebClientDTO(String scheme, String host, String path, Map<String, String> queryParam){
+    public WebClientDTO(String scheme,String host,String path,Map<String,String> queryParam){
         this.scheme = scheme;
         this.host = host;
         this.path = path;
         this.queryParam = queryParam;
-
     }
-    public WebClientDTO(String host,String path,Map<String,String> queryParam){
-        this.scheme = schemeHttps;
+
+    public WebClientDTO(String scheme,String host,String path){
+        this.scheme = scheme;
         this.host = host;
         this.path = path;
-        this.queryParam = queryParam;
-
     }
+
 
 }

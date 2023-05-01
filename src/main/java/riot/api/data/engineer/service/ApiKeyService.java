@@ -5,7 +5,7 @@ import riot.api.data.engineer.entity.api.ApiKey;
 import java.util.List;
 
 public interface ApiKeyService {
-    public ApiKey findOne();
+    ApiKey findOne();
 
     List<ApiKey> findList();
 }
