@@ -6,6 +6,10 @@ import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.api.ApiKey;
 import riot.api.data.engineer.service.WebclientCallService;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -38,7 +42,21 @@ public class WebclientCallServiceImpl implements WebclientCallService {
                 .retrieve().bodyToMono(String.class).block();
     }
 
-
+    @Override
+    public String webclientQueryParamGet(WebClientDTO webClientDTO, ApiKey apikey, Map<String,String> queryParam) {
+        try {
+            String encodeParam = URLEncoder.encode(queryParam.get("summonerId"), "UTF-8");
+            return webClient.get().uri(uriBuilder -> uriBuilder
+                    .scheme(webClientDTO.getScheme())
+                    .host(webClientDTO.getHost())
+                    .path(webClientDTO.getPath())
+                    .queryParamIfPresent("page", Optional.ofNullable(webClientDTO.getQueryParam().get("page")))
+                    .build(encodeParam)).header(apikey.getKeyName(), apikey.getApiKey()).retrieve().bodyToMono(String.class).block();
+//                    .build(queryParam.get("summonerName"))).header(apikey.getKeyName(), apikey.getApiKey()).retrieve().bodyToMono(String.class).block();
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
     @Override
     public String webclientGetWithParam(WebClient webClient, WebClientDTO webClientDTO) {
         return webClient.get().uri(uriBuilder -> uriBuilder
