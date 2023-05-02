@@ -1,4 +1,4 @@
-package riot.api.data.engineer.webclient;
+package riot.api.data.engineer.config;
 
 import io.netty.channel.ChannelOption;
         import io.netty.handler.timeout.ReadTimeoutHandler;

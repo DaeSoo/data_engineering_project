@@ -53,4 +53,8 @@ public class UserInfo {
     @SerializedName("leagueId")
     private String leagueId;
 
+    @Column(name = "api_key_id")
+    @SerializedName("apiKeyId")
+    private Long apiKeyId;
+
 }

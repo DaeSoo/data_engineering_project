@@ -27,4 +27,8 @@ public class UserInfoDetail {
     String summonerLevel;
     @Column(name="profile_icon_id")
     String profileIconId;
+
+    @Column(name = "api_key_id")
+    @SerializedName("apiKeyId")
+    private Long apiKeyId;
 }

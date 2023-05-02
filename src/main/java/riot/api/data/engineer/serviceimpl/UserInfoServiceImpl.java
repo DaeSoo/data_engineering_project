@@ -65,11 +65,14 @@ public class UserInfoServiceImpl implements UserInfoService {
                 break;
             }
             else{
+                for (UserInfo userInfo : userInfoList) {
+                    userInfo.setApiKeyId(apiKey.getApiKeyId());
+                }
                 userInfoRepository.saveAll(userInfoList);
                 page++;
             }
             try {
-                Thread.sleep(1500);
+                Thread.sleep(1200);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
