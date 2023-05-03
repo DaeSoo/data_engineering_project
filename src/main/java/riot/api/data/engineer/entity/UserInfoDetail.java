@@ -11,7 +11,7 @@ import javax.persistence.Id;
 @Entity(name = "user_info_detail")
 @Setter
 @Getter
-public class UserInfoDetail {
+public class UserInfoDetail extends BaseEntity {
     @Column(name="id")
     String id;
     @Column(name="account_id")
