@@ -5,8 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import riot.api.data.engineer.entity.KafkaInfo;
 
-
-import static riot.api.data.engineer.entity.QkafkaInfo.kafkaInfo;
+import static riot.api.data.engineer.entity.QKafkaInfo.kafkaInfo;
 
 
 @RequiredArgsConstructor

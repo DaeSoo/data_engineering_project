@@ -5,7 +5,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
-@Entity
+@Entity(name = "kafka_info")
 @Getter
 @Setter
 public class KafkaInfo {

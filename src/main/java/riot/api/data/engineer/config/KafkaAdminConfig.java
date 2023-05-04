@@ -9,7 +9,6 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaAdmin;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,6 +17,9 @@ import java.util.Map;
 public class KafkaAdminConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
+
+    private static final int partitionCount = 5;
+    private static final int replicaCount = 3;
 
     @Bean
     public KafkaAdmin admin() {
@@ -28,19 +30,18 @@ public class KafkaAdminConfig {
 
     @Bean
     public NewTopic setMatchTopic() {
-//        return TopicBuilder.name("match")
-//                .partitions(3)
-//                .replicas(3)
-//                .compact()
-//                .build();
-        return new NewTopic("match",3, (short)3).configs(Collections.singletonMap("group.id", "groupA"));
+        return TopicBuilder.name("match")
+                .partitions(5)
+                .replicas(replicaCount)
+                .compact()
+                .build();
     }
 
     @Bean
     public NewTopic setRunes() {
         return TopicBuilder.name("runes")
-                .partitions(3)
-                .replicas(3)
+                .partitions(partitionCount)
+                .replicas(replicaCount)
                 .compact()
                 .build();
     }
@@ -48,8 +49,8 @@ public class KafkaAdminConfig {
     @Bean
     public NewTopic setChampions() {
         return TopicBuilder.name("champions")
-                .partitions(3)
-                .replicas(3)
+                .partitions(partitionCount)
+                .replicas(replicaCount)
                 .compact()
                 .build();
     }
@@ -57,17 +58,18 @@ public class KafkaAdminConfig {
     @Bean
     public NewTopic setItems() {
         return TopicBuilder.name("items")
-                .partitions(3)
-                .replicas(3)
+                .partitions(partitionCount)
+                .replicas(replicaCount)
                 .compact()
                 .build();
+
     }
 
     @Bean
     public NewTopic setSpells() {
         return TopicBuilder.name("spells")
-                .partitions(3)
-                .replicas(3)
+                .partitions(partitionCount)
+                .replicas(replicaCount)
                 .compact()
                 .build();
     }
