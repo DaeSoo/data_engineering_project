@@ -3,6 +3,7 @@ package riot.api.data.engineer.serviceimpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import riot.api.data.engineer.dto.WebClientDTO;
@@ -10,10 +11,10 @@ import riot.api.data.engineer.entity.UserInfo;
 import riot.api.data.engineer.entity.UserInfoDetail;
 import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.entity.api.ApiKey;
-import riot.api.data.engineer.repository.*;
-import riot.api.data.engineer.service.UserInfoDetailService;
-import riot.api.data.engineer.service.UserInfoService;
-import riot.api.data.engineer.service.WebclientCallService;
+import riot.api.data.engineer.repository.UserInfoDetailQueryRepository;
+import riot.api.data.engineer.repository.UserInfoDetailRepository;
+import riot.api.data.engineer.service.*;
+
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,24 +24,19 @@ import java.util.concurrent.Executors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserInfoDetailServiceImpl implements UserInfoDetailService {
     private final UserInfoDetailRepository userInfoDetailRepository ;
     private final UserInfoService userInfoService ;
     private final WebclientCallService webclientCallService;
-    private final ApiKeyRepository apiKeyRepository;
-    private final ApiInfoQueryRepository apiInfoQueryRepository;
+    private final ApiKeyService apiKeyService;
+    private final ApiInfoService apiInfoService;
+    private final ReflectionService reflectionService;
+    private final UserInfoDetailQueryRepository userInfoDetailQueryRepository;
 
-    public UserInfoDetailServiceImpl(UserInfoDetailRepository userInfoDetailRepository,
-                                        UserInfoService userInfoService,
-                                        WebclientCallService webclientCallService,
-                                        ApiKeyRepository apiKeyRepository,
-                                        ApiInfoQueryRepository apiInfoQueryRepository) {
-        this.userInfoDetailRepository = userInfoDetailRepository;
-        this.userInfoService = userInfoService;
-        this.webclientCallService = webclientCallService;
-        this.apiKeyRepository = apiKeyRepository;
-        this.apiInfoQueryRepository = apiInfoQueryRepository;
-    }
+    private String pacakgeName = this.getClass().getName();
+
+
     @Override
     public UserInfoDetail userInfoDetailSave(UserInfoDetail userInfoDetail) {
             return userInfoDetailRepository.save(userInfoDetail);
@@ -72,7 +68,7 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
         boolean let = false;
         try{
             List<UserInfo> userInfoList = userInfoService.getUserInfoList(apiKey.getApiKeyId());
-            ApiInfo apiInfo = apiInfoQueryRepository.findOneByName(apiName);
+            ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
             for (UserInfo userInfo : userInfoList) {
                 Map<String, String> queryParam = new HashMap<>();
                 queryParam.put("summonerId", userInfo.getSummonerId());
@@ -82,21 +78,18 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
             /*
                 RiotApi 1분 호출 limit을 맞추기 위한 Thread.sleep
              */
-                try {
-                    Thread.sleep(1500);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                Thread.sleep(1500);
             }
             let = true;
-        }catch (Exception e){
+        }catch (InterruptedException e){
+            Thread.currentThread().interrupt();
             log.info("Exception : {}", e.getMessage());
         }
         return let;
     }
     @Override
     public void createThread(String method){
-        List<ApiKey> apiKeyList = apiKeyRepository.findAll();
+        List<ApiKey> apiKeyList = apiKeyService.findList();
         ExecutorService executorService = Executors.newFixedThreadPool(apiKeyList.size());
         for(ApiKey apiKey : apiKeyList){
             createSubmit(executorService, apiKey, method);
@@ -106,5 +99,19 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
 
     public void createSubmit(ExecutorService executorService, ApiKey apiKey, String apiName){
         executorService.submit(() -> userInfoDetailApiRequest(apiKey, apiName));
+    }
+
+    public void createTestMethod(String pacakgeName,String methodName){
+        reflectionService.createClazz(pacakgeName, methodName);
+    }
+
+    @Override
+    public List<UserInfoDetail> userInfoDeatilList() {
+        return userInfoDetailRepository.findAll();
+    }
+
+    @Override
+    public List<UserInfoDetail> userInfoDeatilList(Long apiKey) {
+        return userInfoDetailQueryRepository.findListByApiKeyId(apiKey);
     }
 }

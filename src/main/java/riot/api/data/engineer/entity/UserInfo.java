@@ -11,7 +11,7 @@ import javax.persistence.Id;
 @Entity(name = "user_info")
 @Setter
 @Getter
-public class UserInfo extends BaseEntity {
+public class UserInfo {
     @Id
     @Column(name="summoner_id")
     @SerializedName("summonerId")
