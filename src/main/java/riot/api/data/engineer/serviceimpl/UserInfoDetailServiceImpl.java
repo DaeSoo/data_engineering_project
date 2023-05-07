@@ -31,7 +31,6 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
     private final WebclientCallService webclientCallService;
     private final ApiKeyService apiKeyService;
     private final ApiInfoService apiInfoService;
-    private final ReflectionService reflectionService;
     private final UserInfoDetailQueryRepository userInfoDetailQueryRepository;
 
     private String pacakgeName = this.getClass().getName();
@@ -56,6 +55,11 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
             log.info("jsonProcessing Exception : {}", e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void createTestMethod(String packageName, String methodName) {
+
     }
 
 
@@ -101,9 +105,6 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
         executorService.submit(() -> userInfoDetailApiRequest(apiKey, apiName));
     }
 
-    public void createTestMethod(String pacakgeName,String methodName){
-        reflectionService.createClazz(pacakgeName, methodName);
-    }
 
     @Override
     public List<UserInfoDetail> userInfoDeatilList() {

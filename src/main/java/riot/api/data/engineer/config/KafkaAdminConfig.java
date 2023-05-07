@@ -31,7 +31,7 @@ public class KafkaAdminConfig {
     @Bean
     public NewTopic setMatchTopic() {
         return TopicBuilder.name("match")
-                .partitions(5)
+                .partitions(partitionCount)
                 .replicas(replicaCount)
                 .compact()
                 .build();

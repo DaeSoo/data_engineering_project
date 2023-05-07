@@ -6,12 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import riot.api.data.engineer.dto.MatchInfoParam;
 import riot.api.data.engineer.dto.WebClientDTO;
-import riot.api.data.engineer.entity.MatchInfo;
-import riot.api.data.engineer.entity.UserInfoDetail;
+import riot.api.data.engineer.entity.*;
 import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.entity.api.ApiKey;
+import riot.api.data.engineer.repository.MatchInfoQueryRepository;
 import riot.api.data.engineer.repository.MatchInfoRepository;
 import riot.api.data.engineer.service.*;
 
@@ -22,6 +23,7 @@ import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -34,6 +36,11 @@ public class MatchInfoServiceImpl implements MatchInfoService {
     private final ApiInfoService apiInfoService;
     private final WebclientCallService webclientCallService;
     private final ApiKeyService apiKeyService;
+    private final MatchInfoQueryRepository matchInfoQueryRepository;
+    private final Executor executor;
+    private final KafkaInfoService kafkaInfoService;
+    private final MyProducer myProducer;
+
 
     @Override
     public MatchInfo matchInfoSave(MatchInfo matchInfo){
@@ -80,6 +87,45 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         executorService.shutdown();
     }
 
+    @Override
+    public List<MatchInfo> getMatchInfoList() {
+        return matchInfoRepository.findAll();
+    }
+
+    @Override
+    public void apiCallBatch(ApiInfo apiInfo, List<ApiKey> apiKeyList) {
+        int batchSize = apiKeyList.size();
+        KafkaInfo kafkaInfo = kafkaInfoService.findOneByApiInfoId(apiInfo.getApiInfoId());
+
+        for (ApiKey apiKey : apiKeyList) {
+            List<MatchInfo> matchInfos = matchInfoQueryRepository.findListByApiKeyId(apiKey.getApiKeyId());
+            executor.execute(() -> {
+                apiCallRepeat(apiInfo,apiKey,matchInfos,kafkaInfo);
+            });
+        }
+
+    }
+
+    protected void apiCallRepeat(ApiInfo apiInfo, ApiKey apiKey,List<MatchInfo> matchInfos,KafkaInfo kafkaInfo){
+
+        for(MatchInfo matchInfo : matchInfos){
+            WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(),apiInfo.getApiHost(), apiInfo.getApiUrl());
+            String response = webclientCallService.webclientGetWithMatchIdWithToken(webClientDTO,apiKey,matchInfo.getId());
+            if(StringUtils.isEmpty(response)){
+                continue;
+            }
+            else{
+                /**** 카프카 전송 ****/
+                myProducer.sendMessage(kafkaInfo,response);
+            }
+            try {
+                Thread.sleep(1200);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     public void createSubmit(ExecutorService executorService, ApiKey apiKey, String apiName){
         executorService.submit(() -> matchApiRequest(apiKey, apiName));
     }
@@ -113,4 +159,6 @@ public class MatchInfoServiceImpl implements MatchInfoService {
                 100
         );
     }
+
+
 }

@@ -42,17 +42,30 @@ public class WebclientCallServiceImpl implements WebclientCallService {
     }
 
     @Override
-    public String webclientQueryParamGet(WebClientDTO webClientDTO, ApiKey apikey, Map<String,String> queryParam) {
-            return webClient.get().uri(uriBuilder -> uriBuilder
-                    .scheme(webClientDTO.getScheme())
-                    .host(webClientDTO.getHost())
-                    .path(webClientDTO.getPath())
-                    .queryParamIfPresent("page", Optional.ofNullable(webClientDTO.getQueryParam().get("page")))
-                    .build(queryParam.get("summonerId"))).header(apikey.getKeyName(), apikey.getApiKey()).retrieve().bodyToMono(String.class).block();
+    public String webclientGetWithMatchIdWithToken(WebClientDTO webClientDTO, ApiKey apiKey, String matchId) {
+        return webClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .scheme(webClientDTO.getScheme())
+                        .host(webClientDTO.getHost())
+                        .path(webClientDTO.getPath())
+                        .build(matchId))
+                .header(apiKey.getKeyName(), apiKey.getApiKey())
+                .retrieve().bodyToMono(String.class).block();
     }
 
     @Override
-    public List<String> webclientQueryParamGet(WebClientDTO webClientDTO, ApiKey apikey, Map<String,String> queryParam, String apiName, MatchInfoParam matchInfoParam) {
+    public String webclientQueryParamGet(WebClientDTO webClientDTO, ApiKey apikey, Map<String, String> queryParam) {
+        return webClient.get().uri(uriBuilder -> uriBuilder
+                .scheme(webClientDTO.getScheme())
+                .host(webClientDTO.getHost())
+                .path(webClientDTO.getPath())
+                .queryParamIfPresent("page", Optional.ofNullable(webClientDTO.getQueryParam().get("page")))
+                .build(queryParam.get("summonerId"))).header(apikey.getKeyName(), apikey.getApiKey()).retrieve().bodyToMono(String.class).block();
+    }
+
+    @Override
+    public List<String> webclientQueryParamGet(WebClientDTO webClientDTO, ApiKey apikey, Map<String, String> queryParam, String apiName, MatchInfoParam matchInfoParam) {
         return webClient.get().uri(uriBuilder -> uriBuilder
                 .scheme(webClientDTO.getScheme())
                 .host(webClientDTO.getHost())

@@ -17,6 +17,8 @@ public interface WebclientCallService {
 
     String webclientGetWithTokenWithPageParam(WebClientDTO webClientDTO, ApiKey apikey);
 
+    String webclientGetWithMatchIdWithToken(WebClientDTO webClientDTO,ApiKey apiKey,String matchId);
+
     String webclientQueryParamGet(WebClientDTO webClientDTO, ApiKey apikey, Map<String,String> queryParam);
 
     List<String> webclientQueryParamGet(WebClientDTO webClientDTO, ApiKey apikey, Map<String,String> queryParam, String apiName, MatchInfoParam matchInfoParam);
