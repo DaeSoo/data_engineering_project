@@ -10,5 +10,11 @@ public interface UserInfoService {
 
     void apiCallBatch(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList);
 
+    void apiCallBatchTest(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList);
+
     List<UserInfo> getUserInfoList(Long apiKey);
+
+    List<UserInfo> getUserInfoListAll();
+
+    void removeAll(List<UserInfo> userInfoList);
 }

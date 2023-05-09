@@ -2,10 +2,10 @@ package riot.api.data.engineer.serviceimpl;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.reactive.function.client.WebClient;
 import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.UserInfo;
 import riot.api.data.engineer.entity.api.ApiInfo;
@@ -19,20 +19,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
+@RequiredArgsConstructor
 public class UserInfoServiceImpl implements UserInfoService {
     private final Executor executor;
+    private final ExecutorService executorService;
     private final WebclientCallService webclientCallService;
     private final UserInfoRepository userInfoRepository;
     private final UserInfoQueryRepository userInfoQueryRepository;
-
-    public UserInfoServiceImpl(Executor executor, WebclientCallService webclientCallService, UserInfoRepository userInfoRepository, UserInfoQueryRepository userInfoQueryRepository) {
-        this.executor = executor;
-        this.webclientCallService = webclientCallService;
-        this.userInfoRepository = userInfoRepository;
-        this.userInfoQueryRepository = userInfoQueryRepository;
-    }
 
     @Override
     public void apiCallBatch(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList) {
@@ -50,7 +47,34 @@ public class UserInfoServiceImpl implements UserInfoService {
                 });
             }
         }
+    }
 
+    @Override
+    public void apiCallBatchTest(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList) {
+        int batchSize = apiKeyList.size();
+        ExecutorService executorService = Executors.newFixedThreadPool(batchSize);
+
+
+        for (int i = 0; i < apiInfoList.size(); i += batchSize) {
+            int endIndex = Math.min(i + batchSize, apiInfoList.size());
+            List<ApiInfo> batch = apiInfoList.subList(i, endIndex);
+            try{
+                for (int j = 0; j < batch.size(); j++) {
+                    int finalJ1 = j;
+                    Runnable task = () -> {
+                        ApiInfo apiInfo = batch.get(finalJ1);
+                        int page = 1;
+                        int finalJ = finalJ1;
+                        apiCallRepeat(apiInfo, apiKeyList.get(finalJ), page);
+                    };
+                    executorService.submit(task);
+                }
+                executorService.shutdown();
+            }catch (Exception e){
+                executorService.shutdownNow();
+            }
+
+        }
     }
 
     @Transactional
@@ -86,6 +110,16 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Override
     public List<UserInfo> getUserInfoList(Long apiKey) {
         return userInfoQueryRepository.findListByApiKeyId(apiKey);
+    }
+
+    @Override
+    public List<UserInfo> getUserInfoListAll() {
+        return userInfoRepository.findAll();
+    }
+
+    @Override
+    public void removeAll(List<UserInfo> userInfoList) {
+        userInfoRepository.deleteAll(userInfoList);
     }
 }
 

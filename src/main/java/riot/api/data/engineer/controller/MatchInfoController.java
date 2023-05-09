@@ -1,11 +1,10 @@
 package riot.api.data.engineer.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.util.CollectionUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import riot.api.data.engineer.entity.MatchInfo;
 import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.entity.api.ApiKey;
 import riot.api.data.engineer.service.ApiInfoService;
@@ -17,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("match")
 @RequiredArgsConstructor
+@Slf4j
 public class MatchInfoController {
 
     private final MatchInfoService matchInfoService;
@@ -34,15 +34,32 @@ public class MatchInfoController {
     public String getMatchDetail(){
         String apiName = "/match/detail";
 
-        ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
-        List<ApiKey> apiKeyList = apiKeyService.findList();
-        List<MatchInfo> matchInfoList = matchInfoService.getMatchInfoList();
-
-        if(!CollectionUtils.isEmpty(matchInfoList)){
+        try{
+            ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
+            List<ApiKey> apiKeyList = apiKeyService.findList();
             matchInfoService.apiCallBatch(apiInfo, apiKeyList);
+        }
+        catch (Exception e){
+            log.info(e.getMessage());
         }
 
         return "success";
     }
 
+    @GetMapping("detailTest")
+    public String getMatchDetailTest(){
+        String apiName = "/match/detail";
+
+        try{
+            ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
+            List<ApiKey> apiKeyList = apiKeyService.findList();
+            int responseSize = matchInfoService.apiCallBatchTest(apiInfo, apiKeyList);
+            return String.valueOf(responseSize);
+        }
+        catch (Exception e){
+            log.info(e.getMessage());
+        }
+
+        return String.valueOf(-1);
+    }
 }

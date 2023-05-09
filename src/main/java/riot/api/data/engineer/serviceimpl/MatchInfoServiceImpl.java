@@ -20,12 +20,11 @@ import riot.api.data.engineer.service.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 @Slf4j
 @Service
@@ -40,6 +39,9 @@ public class MatchInfoServiceImpl implements MatchInfoService {
     private final Executor executor;
     private final KafkaInfoService kafkaInfoService;
     private final MyProducer myProducer;
+    private final ExecutorService executorService;
+
+
 
 
     @Override
@@ -92,19 +94,52 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         return matchInfoRepository.findAll();
     }
 
+
     @Override
     public void apiCallBatch(ApiInfo apiInfo, List<ApiKey> apiKeyList) {
-        int batchSize = apiKeyList.size();
-        KafkaInfo kafkaInfo = kafkaInfoService.findOneByApiInfoId(apiInfo.getApiInfoId());
+        try{
+            ExecutorService executorService = Executors.newFixedThreadPool(apiKeyList.size());
+            KafkaInfo kafkaInfo = kafkaInfoService.findOneByApiInfoId(apiInfo.getApiInfoId());
+            for(ApiKey apiKey : apiKeyList){
+                Runnable task = () -> {
+                    List<MatchInfo> matchInfos = matchInfoQueryRepository.findListByApiKeyId(apiKey.getApiKeyId());
+                    apiCallRepeat(apiInfo, apiKey, matchInfos, kafkaInfo);
+                };
+                executorService.submit(task);
+            }
+            executorService.shutdown();
+        }catch (Exception e){
+            executorService.shutdownNow();
+            log.info(e.getMessage());
+        }
+    }
 
-        for (ApiKey apiKey : apiKeyList) {
-            List<MatchInfo> matchInfos = matchInfoQueryRepository.findListByApiKeyId(apiKey.getApiKeyId());
-            executor.execute(() -> {
-                apiCallRepeat(apiInfo,apiKey,matchInfos,kafkaInfo);
-            });
+    @Override
+    public int apiCallBatchTest(ApiInfo apiInfo, List<ApiKey> apiKeyList) {
+        try{
+            List<Callable<Integer>> tasks = new ArrayList<>();
+
+            ExecutorService executorService = Executors.newFixedThreadPool(apiKeyList.size());
+            KafkaInfo kafkaInfo = kafkaInfoService.findOneByApiInfoId(apiInfo.getApiInfoId());
+            for(ApiKey apiKey : apiKeyList){
+                Callable<Integer> task = () -> {
+                    List<MatchInfo> matchInfos = matchInfoQueryRepository.findListByApiKeyId(apiKey.getApiKeyId());
+                    apiCallRepeatTest(apiInfo, apiKey, matchInfos, kafkaInfo);
+                    return 1;
+                };
+                tasks.add(task);
+            }
+            executorService.invokeAll(tasks);
+            executorService.shutdown();
+            return 2;
+        }catch (Exception e){
+            executorService.shutdownNow();
+            log.info(e.getMessage());
+            return -1;
         }
 
     }
+
 
     protected void apiCallRepeat(ApiInfo apiInfo, ApiKey apiKey,List<MatchInfo> matchInfos,KafkaInfo kafkaInfo){
 
@@ -124,6 +159,30 @@ public class MatchInfoServiceImpl implements MatchInfoService {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    protected void apiCallRepeatTest(ApiInfo apiInfo, ApiKey apiKey,List<MatchInfo> matchInfos,KafkaInfo kafkaInfo){
+        List<String> responseList = new ArrayList<>();
+
+        for(MatchInfo matchInfo : matchInfos){
+            WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(),apiInfo.getApiHost(), apiInfo.getApiUrl());
+            String response = webclientCallService.webclientGetWithMatchIdWithToken(webClientDTO,apiKey,matchInfo.getId());
+            if(StringUtils.isEmpty(response)){
+                continue;
+            }
+            else{
+                /**** 카프카 전송 ****/
+                responseList.add(response);
+                myProducer.sendMessage(kafkaInfo,response);
+            }
+            try {
+                Thread.sleep(1200);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+//        return CompletableFuture.completedFuture(responseList);
+//        return responseList.size();
     }
 
     public void createSubmit(ExecutorService executorService, ApiKey apiKey, String apiName){

@@ -1,9 +1,12 @@
 package riot.api.data.engineer.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import riot.api.data.engineer.entity.UserInfo;
 import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.entity.api.ApiKey;
 import riot.api.data.engineer.service.ApiInfoService;
@@ -36,12 +39,24 @@ public class UserInfoController {
         List<ApiInfo> apiInfoList = apiInfoService.findByName(apiName);
         List<ApiKey> apiKeyList = apiKeyService.findList();
 
-        userInfoService.apiCallBatch(apiInfoList, apiKeyList);
+        userInfoService.apiCallBatchTest(apiInfoList, apiKeyList);
 
         return "success";
 
     }
 
-
+    @PutMapping("/user/entries/remove")
+    public String userEntriesRemove() {
+        try{
+            List<UserInfo> userInfoList = userInfoService.getUserInfoListAll();
+            if(CollectionUtils.isEmpty(userInfoList)){
+                return "fail";
+            }
+            userInfoService.removeAll(userInfoList);
+            return "success";
+        }catch (Exception e){
+            return "fail";
+        }
+    }
 }
 
