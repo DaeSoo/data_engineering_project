@@ -17,8 +17,8 @@ public class UserInfoDetailController {
     }
 
     @GetMapping("save")
-    public String getUserInfoDetail(){
-        userInfoDetailService.createThread(new Exception().getStackTrace()[0].getMethodName());
-        return "success";
+    public int getUserInfoDetail(){
+        int response = userInfoDetailService.createThread(new Exception().getStackTrace()[0].getMethodName());
+        return response;
     }
 }

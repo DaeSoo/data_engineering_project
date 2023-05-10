@@ -16,9 +16,11 @@ import riot.api.data.engineer.repository.UserInfoDetailRepository;
 import riot.api.data.engineer.service.*;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -92,13 +94,26 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
         return let;
     }
     @Override
-    public void createThread(String method){
+    public int createThread(String method){
         List<ApiKey> apiKeyList = apiKeyService.findList();
+        List<Callable<Integer>> tasks = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(apiKeyList.size());
-        for(ApiKey apiKey : apiKeyList){
-            createSubmit(executorService, apiKey, method);
+
+        try{
+            for(ApiKey apiKey : apiKeyList){
+                Callable<Integer> task = () -> {
+                    userInfoDetailApiRequest(apiKey, method);
+                    return 1;
+                };
+                tasks.add(task);
+            }
+            executorService.shutdown();
         }
-        executorService.shutdown();
+        catch (Exception e){
+            executorService.shutdownNow();
+            return -1;
+        }
+        return 2;
     }
 
     public void createSubmit(ExecutorService executorService, ApiKey apiKey, String apiName){

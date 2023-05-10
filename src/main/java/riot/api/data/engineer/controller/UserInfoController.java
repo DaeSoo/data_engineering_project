@@ -34,14 +34,14 @@ public class UserInfoController {
 
 
     @GetMapping("/user/entries")
-    public String getUserEntries() {
+    public int getUserEntries() {
         String apiName = "/userinfo/entries";
         List<ApiInfo> apiInfoList = apiInfoService.findByName(apiName);
         List<ApiKey> apiKeyList = apiKeyService.findList();
 
-        userInfoService.apiCallBatchTest(apiInfoList, apiKeyList);
+        int response = userInfoService.apiCallBatchTest(apiInfoList, apiKeyList);
 
-        return "success";
+        return response;
 
     }
 

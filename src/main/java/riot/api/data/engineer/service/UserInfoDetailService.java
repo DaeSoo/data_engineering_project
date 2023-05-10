@@ -12,7 +12,7 @@ public interface UserInfoDetailService {
 
     Boolean userInfoDetailApiRequest(ApiKey apiKey, String apiName);
 
-    void createThread(String method);
+    int createThread(String method);
 
     UserInfoDetail jsonToEntity(String response, Long apiKeyId);
 

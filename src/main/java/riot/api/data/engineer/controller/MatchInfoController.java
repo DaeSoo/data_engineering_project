@@ -47,19 +47,18 @@ public class MatchInfoController {
     }
 
     @GetMapping("detailTest")
-    public String getMatchDetailTest(){
+    public int getMatchDetailTest(){
         String apiName = "/match/detail";
 
         try{
             ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
             List<ApiKey> apiKeyList = apiKeyService.findList();
-            int responseSize = matchInfoService.apiCallBatchTest(apiInfo, apiKeyList);
-            return String.valueOf(responseSize);
+            int response = matchInfoService.apiCallBatchTest(apiInfo, apiKeyList);
+            return response;
         }
         catch (Exception e){
             log.info(e.getMessage());
+            return -1;
         }
-
-        return String.valueOf(-1);
     }
 }

@@ -15,9 +15,11 @@ import riot.api.data.engineer.repository.UserInfoRepository;
 import riot.api.data.engineer.service.UserInfoService;
 import riot.api.data.engineer.service.WebclientCallService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -50,10 +52,10 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Override
-    public void apiCallBatchTest(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList) {
+    public int apiCallBatchTest(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList) {
         int batchSize = apiKeyList.size();
+        List<Callable<Integer>> tasks = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(batchSize);
-
 
         for (int i = 0; i < apiInfoList.size(); i += batchSize) {
             int endIndex = Math.min(i + batchSize, apiInfoList.size());
@@ -61,20 +63,23 @@ public class UserInfoServiceImpl implements UserInfoService {
             try{
                 for (int j = 0; j < batch.size(); j++) {
                     int finalJ1 = j;
-                    Runnable task = () -> {
+                    Callable<Integer> task = () -> {
                         ApiInfo apiInfo = batch.get(finalJ1);
                         int page = 1;
                         int finalJ = finalJ1;
                         apiCallRepeat(apiInfo, apiKeyList.get(finalJ), page);
+                        return 1;
                     };
-                    executorService.submit(task);
+                    tasks.add(task);
                 }
+                executorService.invokeAll(tasks);
                 executorService.shutdown();
             }catch (Exception e){
                 executorService.shutdownNow();
+                return -1;
             }
-
         }
+        return 2;
     }
 
     @Transactional

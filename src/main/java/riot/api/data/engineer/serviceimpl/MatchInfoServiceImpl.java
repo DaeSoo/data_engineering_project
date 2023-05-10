@@ -181,8 +181,6 @@ public class MatchInfoServiceImpl implements MatchInfoService {
                 throw new RuntimeException(e);
             }
         }
-//        return CompletableFuture.completedFuture(responseList);
-//        return responseList.size();
     }
 
     public void createSubmit(ExecutorService executorService, ApiKey apiKey, String apiName){

@@ -10,7 +10,7 @@ public interface UserInfoService {
 
     void apiCallBatch(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList);
 
-    void apiCallBatchTest(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList);
+    int apiCallBatchTest(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList);
 
     List<UserInfo> getUserInfoList(Long apiKey);
 
