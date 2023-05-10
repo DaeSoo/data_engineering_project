@@ -107,6 +107,7 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
                 };
                 tasks.add(task);
             }
+            executorService.invokeAll(tasks);
             executorService.shutdown();
         }
         catch (Exception e){
