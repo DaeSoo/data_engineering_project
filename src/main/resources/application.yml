@@ -38,5 +38,11 @@ spring:
           descripter:
             sql: trace
 
+minio:
+  url: http://192.168.2.139:9000
+  access_key: minio
+  secret_key: minio123
+  bucket: riot
+
 server:
   port: 20000
