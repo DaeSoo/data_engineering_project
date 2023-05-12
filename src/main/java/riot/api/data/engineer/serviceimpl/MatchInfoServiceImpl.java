@@ -3,6 +3,8 @@ package riot.api.data.engineer.serviceimpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,9 +14,13 @@ import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.*;
 import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.entity.api.ApiKey;
+import riot.api.data.engineer.entity.matchdetail.Info;
+import riot.api.data.engineer.entity.matchdetail.MatchDetail;
+import riot.api.data.engineer.entity.matchdetail.MetaData;
 import riot.api.data.engineer.repository.MatchInfoQueryRepository;
 import riot.api.data.engineer.repository.MatchInfoRepository;
 import riot.api.data.engineer.service.*;
+import riot.api.data.engineer.utils.UtilManager;
 
 
 import java.time.LocalDateTime;
@@ -162,8 +168,7 @@ public class MatchInfoServiceImpl implements MatchInfoService {
     }
 
     protected void apiCallRepeatTest(ApiInfo apiInfo, ApiKey apiKey,List<MatchInfo> matchInfos,KafkaInfo kafkaInfo){
-        List<String> responseList = new ArrayList<>();
-
+        Gson gson = new Gson();
         for(MatchInfo matchInfo : matchInfos){
             WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(),apiInfo.getApiHost(), apiInfo.getApiUrl());
             String response = webclientCallService.webclientGetWithMatchIdWithToken(webClientDTO,apiKey,matchInfo.getId());
@@ -172,8 +177,10 @@ public class MatchInfoServiceImpl implements MatchInfoService {
             }
             else{
                 /**** 카프카 전송 ****/
-                responseList.add(response);
-                myProducer.sendMessage(kafkaInfo,response);
+                MatchDetail matchDetail = setMatchInfoDetail(response);
+                String processedResponse = gson.toJson(matchDetail);
+
+                myProducer.sendMessage(kafkaInfo,processedResponse);
             }
             try {
                 Thread.sleep(1200);
@@ -181,6 +188,29 @@ public class MatchInfoServiceImpl implements MatchInfoService {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private MatchDetail setMatchInfoDetail(String response) {
+        Gson gson = new Gson();
+        JsonObject jsonObject = new UtilManager().StringToJsonObject(response);
+        MatchDetail matchDetail = new MatchDetail();
+
+        Info infoData = gson.fromJson(jsonObject.getAsJsonObject("info"),Info.class);
+        matchDetail.setInfo(infoData);
+
+        MetaData metaData = gson.fromJson(jsonObject.getAsJsonObject("metadata"),MetaData.class);
+        matchDetail.setMetadata(metaData);
+
+        return matchDetail;
+    }
+
+    private Info setInfo(String response) {
+        Gson gson = new Gson();
+        JsonObject jsonObject = new UtilManager().StringToJsonObject(response);
+
+        Info infoData = gson.fromJson(jsonObject.getAsJsonObject("info"),Info.class);
+
+        return infoData;
     }
 
     public void createSubmit(ExecutorService executorService, ApiKey apiKey, String apiName){

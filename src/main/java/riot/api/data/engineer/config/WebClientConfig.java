@@ -70,6 +70,4 @@ public class WebClientConfig {
                 .defaultCookie("httpclient-type", "webclient")
                 .build();
     }
-
-
 }

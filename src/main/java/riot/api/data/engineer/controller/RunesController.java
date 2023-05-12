@@ -45,10 +45,11 @@ public class RunesController {
         KafkaInfo kafkaInfo = kafkaInfoService.findOneByApiInfoId(apiInfo.getApiInfoId());
 
         String response = webclientCallService.webclientGetWithVersion(new WebClientDTO(apiInfo.getApiScheme(), apiInfo.getApiHost(), apiInfo.getApiUrl()), version.getVersion());
+        String responseReplaceSlash = response.replace("\\","");
 
-        myProducer.sendMessage(kafkaInfo,response);
+        myProducer.sendMessage(kafkaInfo,responseReplaceSlash);
 
-        return "success";
+        return responseReplaceSlash;
     }
 
 }

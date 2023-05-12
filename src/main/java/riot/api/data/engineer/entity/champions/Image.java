@@ -1,4 +1,4 @@
-package riot.api.data.engineer.entity;
+package riot.api.data.engineer.entity.champions;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
