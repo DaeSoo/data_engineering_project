@@ -31,22 +31,6 @@ public class MatchInfoController {
     }
 
     @GetMapping("detail")
-    public String getMatchDetail(){
-        String apiName = "/match/detail";
-
-        try{
-            ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
-            List<ApiKey> apiKeyList = apiKeyService.findList();
-            matchInfoService.apiCallBatch(apiInfo, apiKeyList);
-        }
-        catch (Exception e){
-            log.info(e.getMessage());
-        }
-
-        return "success";
-    }
-
-    @GetMapping("detailTest")
     public int getMatchDetailTest(){
         String apiName = "/match/detail";
 
