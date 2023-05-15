@@ -51,6 +51,7 @@ public class SpellsController {
 
         Gson gson = new Gson();
         for (Spell spell : spells.getSpellList()) {
+            spell.setVersion(spells.getVersion().replaceAll("\"",""));
             String json = gson.toJson(spell);
             myProducer.sendMessage(kafkaInfo, json);
         }

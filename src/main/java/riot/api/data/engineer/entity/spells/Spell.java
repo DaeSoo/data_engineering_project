@@ -29,6 +29,8 @@ public class Spell {
     String rangeBurn;
     @SerializedName("resource")
     String resource;
+    @SerializedName("currentVersion")
+    String version;
 
 }
 
