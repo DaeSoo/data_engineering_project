@@ -51,6 +51,7 @@ public class ItemsController {
         Gson gson = new Gson();
         items.getItemList().forEach( item -> {
             item.setVersion(items.getVersion().replaceAll("\"",""));
+            item.setDescription(item.getDescription().replaceAll("<[^>]+>",""));
             String json = gson.toJson(item);
             myProducer.sendMessage(kafkaInfo, json);
         });
