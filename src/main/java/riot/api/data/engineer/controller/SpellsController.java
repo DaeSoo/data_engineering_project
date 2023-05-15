@@ -1,6 +1,7 @@
 package riot.api.data.engineer.controller;
 
 import com.google.gson.Gson;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +18,7 @@ import riot.api.data.engineer.service.*;
 @Slf4j
 @RestController
 @RequestMapping(value = "/ddragon/spells")
+@RequiredArgsConstructor
 public class SpellsController {
 
     private final ApiInfoService apiInfoService;
@@ -25,15 +27,6 @@ public class SpellsController {
     private final KafkaInfoService kafkaInfoService;
     private final MyProducer myProducer;
     private final SpellService spellService;
-
-    public SpellsController(ApiInfoService apiInfoService, VersionService versionService, WebclientCallService webclientCallService, KafkaInfoService kafkaInfoService, MyProducer myProducer, SpellService spellService) {
-        this.apiInfoService = apiInfoService;
-        this.versionService = versionService;
-        this.webclientCallService = webclientCallService;
-        this.kafkaInfoService = kafkaInfoService;
-        this.myProducer = myProducer;
-        this.spellService = spellService;
-    }
 
     @GetMapping("/get")
     public String getSpells() {

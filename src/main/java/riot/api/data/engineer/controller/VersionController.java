@@ -2,6 +2,7 @@ package riot.api.data.engineer.controller;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,17 +22,11 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(value = "/ddragon/version")
+@RequiredArgsConstructor
 public class VersionController {
     private final ApiInfoService apiInfoService;
     private final WebclientCallService webclientCallService;
     private final VersionService versionService;
-
-    public VersionController(ApiInfoService apiInfoService,
-                             WebclientCallService webclientCallService, VersionService versionService) {
-        this.apiInfoService = apiInfoService;
-        this.webclientCallService = webclientCallService;
-        this.versionService = versionService;
-    }
 
     @GetMapping("/get")
     public List<Version> getVersion() {

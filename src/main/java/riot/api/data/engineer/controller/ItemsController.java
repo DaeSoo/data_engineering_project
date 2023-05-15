@@ -1,6 +1,7 @@
 package riot.api.data.engineer.controller;
 
 import com.google.gson.Gson;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.util.ObjectUtils;
@@ -18,6 +19,7 @@ import riot.api.data.engineer.service.*;
 @Slf4j
 @RestController
 @RequestMapping(value = "/ddragon/items")
+@RequiredArgsConstructor
 public class ItemsController {
 
     private final ApiInfoService apiInfoService;
@@ -27,14 +29,6 @@ public class ItemsController {
     private final MyProducer myProducer;
     private final ItemService itemService;
 
-    public ItemsController(ApiInfoService apiInfoService, VersionService versionService, WebclientCallService webclientCallService, KafkaTemplate<String, String> kafkaTemplate, KafkaInfoService kafkaInfoService, MyProducer myProducer, ItemService itemService) {
-        this.apiInfoService = apiInfoService;
-        this.versionService = versionService;
-        this.webclientCallService = webclientCallService;
-        this.kafkaInfoService = kafkaInfoService;
-        this.myProducer = myProducer;
-        this.itemService = itemService;
-    }
 
     @GetMapping("/get")
     public String getItems() {

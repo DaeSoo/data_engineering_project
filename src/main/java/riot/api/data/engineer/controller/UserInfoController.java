@@ -1,5 +1,6 @@
 package riot.api.data.engineer.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,19 +20,11 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(value = "/userinfo")
+@RequiredArgsConstructor
 public class UserInfoController {
     private final ApiInfoService apiInfoService;
     private final ApiKeyService apiKeyService;
     private final UserInfoService userInfoService;
-
-    public UserInfoController(ApiInfoService apiInfoService,
-                              ApiKeyService apiKeyService,
-                              UserInfoService userInfoService) {
-        this.apiInfoService = apiInfoService;
-        this.apiKeyService = apiKeyService;
-        this.userInfoService = userInfoService;
-    }
-
 
     @GetMapping("/user/entries")
     public int getUserEntries() {

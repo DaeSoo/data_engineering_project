@@ -1,6 +1,7 @@
 package riot.api.data.engineer.controller;
 
 import com.google.gson.Gson;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +22,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(value = "/ddragon/champions")
+@RequiredArgsConstructor
 public class ChampionsController {
 
     private final ChampionsService championsService;
@@ -29,15 +31,6 @@ public class ChampionsController {
     private final VersionService versionService;
     private final KafkaInfoService kafkaInfoService;
     private final MyProducer myProducer;
-
-    public ChampionsController(ChampionsService championsService, WebclientCallService webclientCallService, ApiInfoService apiInfoService, VersionService versionService, KafkaInfoService kafkaInfoService, MyProducer myProducer) {
-        this.championsService = championsService;
-        this.kafkaInfoService = kafkaInfoService;
-        this.myProducer = myProducer;
-        this.webclientCallService = webclientCallService;
-        this.apiInfoService = apiInfoService;
-        this.versionService = versionService;
-    }
 
     @GetMapping("/get")
     public String getChampions() {

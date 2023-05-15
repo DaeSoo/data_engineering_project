@@ -1,5 +1,7 @@
 package riot.api.data.engineer.controller;
 
+import com.google.gson.Gson;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,14 +11,13 @@ import riot.api.data.engineer.entity.KafkaInfo;
 import riot.api.data.engineer.entity.MyProducer;
 import riot.api.data.engineer.entity.Version;
 import riot.api.data.engineer.entity.api.ApiInfo;
-import riot.api.data.engineer.service.ApiInfoService;
-import riot.api.data.engineer.service.KafkaInfoService;
-import riot.api.data.engineer.service.VersionService;
-import riot.api.data.engineer.service.WebclientCallService;
+import riot.api.data.engineer.entity.runes.RuneList;
+import riot.api.data.engineer.service.*;
 
 @Slf4j
 @RestController
 @RequestMapping(value = "/ddragon/runes")
+@RequiredArgsConstructor
 public class RunesController {
 
     private final ApiInfoService apiInfoService;
@@ -25,15 +26,7 @@ public class RunesController {
     private final WebclientCallService webclientCallService;
     private final KafkaInfoService kafkaInfoService;
     private final MyProducer myProducer;
-
-    public RunesController(ApiInfoService apiInfoService, VersionService versionService, WebclientCallService webclientCallService, KafkaInfoService kafkaInfoService, MyProducer myProducer) {
-        this.apiInfoService = apiInfoService;
-        this.versionService = versionService;
-        this.webclientCallService = webclientCallService;
-        this.kafkaInfoService = kafkaInfoService;
-
-        this.myProducer = myProducer;
-    }
+    private final RuneService runeService;
 
     @GetMapping("/get")
     public String getRunes() {
@@ -45,11 +38,15 @@ public class RunesController {
         KafkaInfo kafkaInfo = kafkaInfoService.findOneByApiInfoId(apiInfo.getApiInfoId());
 
         String response = webclientCallService.webclientGetWithVersion(new WebClientDTO(apiInfo.getApiScheme(), apiInfo.getApiHost(), apiInfo.getApiUrl()), version.getVersion());
-        String responseReplaceSlash = response.replace("\\","");
 
-        myProducer.sendMessage(kafkaInfo,responseReplaceSlash);
+        RuneList runeList = runeService.setRuneList(response);
+        Gson gson = new Gson();
+        runeList.getRuneList().forEach(rune -> {
+            String json = gson.toJson(rune);
+            myProducer.sendMessage(kafkaInfo, json);
+        });
 
-        return responseReplaceSlash;
+        return response;
     }
 
 }
