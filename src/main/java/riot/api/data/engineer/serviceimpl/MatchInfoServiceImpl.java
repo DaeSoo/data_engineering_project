@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import riot.api.data.engineer.dto.FileDto;
 import riot.api.data.engineer.dto.MatchInfoParam;
 import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.*;
@@ -23,6 +24,8 @@ import riot.api.data.engineer.service.*;
 import riot.api.data.engineer.utils.UtilManager;
 
 
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
@@ -46,6 +49,7 @@ public class MatchInfoServiceImpl implements MatchInfoService {
     private final KafkaInfoService kafkaInfoService;
     private final MyProducer myProducer;
     private final ExecutorService executorService;
+    private final MinioService minioService;
 
 
 
@@ -156,6 +160,8 @@ public class MatchInfoServiceImpl implements MatchInfoService {
                 continue;
             }
             else{
+                /**** 원천 데이터 전송 ****/
+                minioService.save(minioService.uploadInputStream(matchInfo.getId(), response));
                 /**** 카프카 전송 ****/
                 myProducer.sendMessage(kafkaInfo,response);
             }
