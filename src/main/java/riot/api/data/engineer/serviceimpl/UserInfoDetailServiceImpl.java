@@ -90,7 +90,7 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
             /*
                 RiotApi 1분 호출 limit을 맞추기 위한 Thread.sleep
              */
-                Thread.sleep(800);
+                Thread.sleep(1200);
             }
             let = true;
         }catch (InterruptedException e){
