@@ -48,9 +48,9 @@ public class WebClientConfig {
                                 clientRequest -> {
                                     log.info(">>>>>>>>>> REQUEST <<<<<<<<<<");
                                     log.info("Request: {} {}", clientRequest.method(), clientRequest.url());
-                                    clientRequest.headers().forEach(
-                                            (name, values) -> values.forEach(value -> log.info("{} : {}", name, value))
-                                    );
+//                                    clientRequest.headers().forEach(
+//                                            (name, values) -> values.forEach(value -> log.info("{} : {}", name, value))
+//                                    );
                                     return Mono.just(clientRequest);
                                 }
                         )
@@ -60,7 +60,9 @@ public class WebClientConfig {
                                 clientResponse -> {
                                     log.info(">>>>>>>>>> RESPONSE <<<<<<<<<<");
                                     log.info("Status Code : " + clientResponse.statusCode());
-                                    clientResponse.headers().asHttpHeaders().forEach((name, values) -> values.forEach(value -> log.info("{} : {}", name, value)));
+                                    if(clientResponse.statusCode().is4xxClientError() || clientResponse.statusCode().is5xxServerError()){
+                                        clientResponse.headers().asHttpHeaders().forEach((name, values) -> values.forEach(value -> log.info("{} : {}", name, value)));
+                                    }
                                     return Mono.just(clientResponse);
                                 }
                         )
