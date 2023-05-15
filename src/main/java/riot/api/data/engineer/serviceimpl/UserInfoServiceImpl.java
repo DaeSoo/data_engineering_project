@@ -99,6 +99,7 @@ public class UserInfoServiceImpl implements UserInfoService {
             }
             else{
                 for (UserInfo userInfo : userInfoList) {
+                    userInfo.setUpdateYn("N");
                     userInfo.setApiKeyId(apiKey.getApiKeyId());
                 }
                 userInfoRepository.saveAll(userInfoList);
@@ -113,8 +114,8 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Override
-    public List<UserInfo> getUserInfoList(Long apiKey) {
-        return userInfoQueryRepository.findListByApiKeyId(apiKey);
+    public List<UserInfo> getUserInfoList(Long apiKey, String updateYn) {
+        return userInfoQueryRepository.findListByApiKeyId(apiKey, updateYn);
     }
 
     @Override
@@ -125,6 +126,11 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Override
     public void removeAll(List<UserInfo> userInfoList) {
         userInfoRepository.deleteAll(userInfoList);
+    }
+
+    @Override
+    public UserInfo save(UserInfo userInfo) {
+        return userInfoRepository.save(userInfo);
     }
 }
 

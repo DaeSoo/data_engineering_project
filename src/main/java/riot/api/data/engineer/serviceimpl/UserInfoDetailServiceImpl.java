@@ -73,7 +73,7 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
     public Boolean userInfoDetailApiRequest(ApiKey apiKey, String apiName) {
         boolean let = false;
         try{
-            List<UserInfo> userInfoList = userInfoService.getUserInfoList(apiKey.getApiKeyId());
+            List<UserInfo> userInfoList = userInfoService.getUserInfoList(apiKey.getApiKeyId(), "N");
             ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
             for (UserInfo userInfo : userInfoList) {
                 Map<String, String> queryParam = new HashMap<>();
@@ -81,15 +81,23 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
                 WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(), apiInfo.getApiHost(), apiInfo.getApiUrl(), queryParam);
                 String response = webclientCallService.webclientQueryParamGet(webClientDTO, apiKey, queryParam);
                 userInfoDetailSave(jsonToEntity(response, apiKey.getApiKeyId()));
+                /*
+                 * UserInfoDetail Save가 됬을 경우
+                 * userInfo의 setUpdateYn = Default 값이 N을 Y로 변경
+                 */
+                userInfo.setUpdateYn("Y");
+                userInfoService.save(userInfo);
             /*
                 RiotApi 1분 호출 limit을 맞추기 위한 Thread.sleep
              */
-                Thread.sleep(1500);
+                Thread.sleep(800);
             }
             let = true;
         }catch (InterruptedException e){
             Thread.currentThread().interrupt();
             log.info("Exception : {}", e.getMessage());
+        }finally {
+            Thread.currentThread().interrupt();
         }
         return let;
     }

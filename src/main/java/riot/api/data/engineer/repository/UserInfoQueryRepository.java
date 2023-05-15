@@ -14,9 +14,9 @@ import static riot.api.data.engineer.entity.QUserInfo.userInfo;
 public class UserInfoQueryRepository {
     private final JPAQueryFactory queryFactory;
 
-    public List<UserInfo> findListByApiKeyId(Long apiKeyId) {
+    public List<UserInfo> findListByApiKeyId(Long apiKeyId, String updateYn) {
         return queryFactory.selectFrom(userInfo)
-                .where(userInfo.apiKeyId.eq(apiKeyId))
+                .where(userInfo.apiKeyId.eq(apiKeyId), userInfo.updateYn.eq(updateYn))
                 .fetch();
     }
 

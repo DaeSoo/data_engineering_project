@@ -12,9 +12,11 @@ public interface UserInfoService {
 
     int apiCallBatchTest(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList);
 
-    List<UserInfo> getUserInfoList(Long apiKey);
+    List<UserInfo> getUserInfoList(Long apiKey, String updateYn);
 
     List<UserInfo> getUserInfoListAll();
 
     void removeAll(List<UserInfo> userInfoList);
+
+    UserInfo save(UserInfo userInfo);
 }

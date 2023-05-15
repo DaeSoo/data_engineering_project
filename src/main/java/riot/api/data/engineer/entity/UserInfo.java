@@ -53,6 +53,10 @@ public class UserInfo {
     @SerializedName("leagueId")
     private String leagueId;
 
+    @Column(name="update_yn", columnDefinition = "N")
+    @SerializedName("updateYn")
+    private String updateYn;
+
     @Column(name = "api_key_id")
     @SerializedName("apiKeyId")
     private Long apiKeyId;
