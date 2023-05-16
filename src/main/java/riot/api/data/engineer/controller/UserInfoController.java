@@ -27,12 +27,12 @@ public class UserInfoController {
     private final UserInfoService userInfoService;
 
     @GetMapping("/user/entries")
-    public int getUserEntries() {
+    public int getUserEntries() throws InterruptedException {
         String apiName = "/userinfo/entries";
         List<ApiInfo> apiInfoList = apiInfoService.findByName(apiName);
         List<ApiKey> apiKeyList = apiKeyService.findList();
 
-        int response = userInfoService.apiCallBatchTest(apiInfoList, apiKeyList);
+        int response = userInfoService.apiCallBatch(apiInfoList, apiKeyList);
 
         return response;
 

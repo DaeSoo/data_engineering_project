@@ -22,6 +22,7 @@ public class ApiInfoQueryRepository {
     public List<ApiInfo> findByName(String apiName){
         return queryFactory.selectFrom(apiInfo)
                 .where(apiInfo.apiName.eq(apiName))
+                .orderBy(apiInfo.apiInfoId.asc())
                 .fetch();
     }
 }

@@ -61,6 +61,7 @@ public class WebClientConfig {
                                     log.info(">>>>>>>>>> RESPONSE <<<<<<<<<<");
                                     log.info("Status Code : " + clientResponse.statusCode());
                                     if(clientResponse.statusCode().is4xxClientError() || clientResponse.statusCode().is5xxServerError()){
+                                        log.info("--- ERROR LOG ---");
                                         clientResponse.headers().asHttpHeaders().forEach((name, values) -> values.forEach(value -> log.info("{} : {}", name, value)));
                                     }
                                     return Mono.just(clientResponse);

@@ -8,9 +8,8 @@ import java.util.List;
 
 public interface UserInfoService {
 
-    void apiCallBatch(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList);
 
-    int apiCallBatchTest(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList);
+    int apiCallBatch(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList) throws InterruptedException;
 
     List<UserInfo> getUserInfoList(Long apiKey, String updateYn);
 

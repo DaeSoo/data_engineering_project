@@ -33,62 +33,45 @@ public class UserInfoServiceImpl implements UserInfoService {
     private final UserInfoRepository userInfoRepository;
     private final UserInfoQueryRepository userInfoQueryRepository;
 
-    @Override
-    public void apiCallBatch(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList) {
-        int batchSize = apiKeyList.size();
-
-        for (int i = 0; i < apiInfoList.size(); i += batchSize) {
-            int endIndex = Math.min(i + batchSize, apiInfoList.size());
-            List<ApiInfo> batch = apiInfoList.subList(i, endIndex);
-            for (int j = 0; j < batch.size(); j++) {
-                ApiInfo apiInfo = batch.get(j);
-                int page = 1;
-                int finalJ = j;
-                executor.execute(() -> {
-                    apiCallRepeat(apiInfo,apiKeyList.get(finalJ),page);
-                });
-            }
-        }
-    }
 
     @Override
-    public int apiCallBatchTest(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList) {
+    public int apiCallBatch(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList) {
         int batchSize = apiKeyList.size();
         List<Callable<Integer>> tasks = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(batchSize);
 
-        for (int i = 0; i < apiInfoList.size(); i += batchSize) {
-            int endIndex = Math.min(i + batchSize, apiInfoList.size());
-            List<ApiInfo> batch = apiInfoList.subList(i, endIndex);
-            try{
-                for (int j = 0; j < batch.size(); j++) {
-                    int finalJ1 = j;
-                    Callable<Integer> task = () -> {
-                        ApiInfo apiInfo = batch.get(finalJ1);
-                        int page = 1;
-                        int finalJ = finalJ1;
-                        apiCallRepeat(apiInfo, apiKeyList.get(finalJ), page);
-                        return 1;
-                    };
-                    tasks.add(task);
-                }
-                executorService.invokeAll(tasks);
-                executorService.shutdown();
-            }catch (Exception e){
-                executorService.shutdownNow();
-                return -1;
+        for(ApiInfo apiInfo : apiInfoList) {
+            int page = 1;
+            for (ApiKey apiKey : apiKeyList) {
+                int finalPage = page;
+                Callable<Integer> task = () -> {
+                    apiCallRepeat(apiInfo, apiKey, finalPage,batchSize);
+                    return 1;
+                };
+                page++;
+                tasks.add(task);
             }
         }
+        try{
+            executorService.invokeAll(tasks);
+            executorService.shutdown();
+        }
+        catch (Exception e){
+            executorService.shutdownNow();
+            return -1;
+        }
+
         return 2;
     }
 
     @Transactional
-    protected void apiCallRepeat(ApiInfo apiInfo, ApiKey apiKey, int page){
+    protected void apiCallRepeat(ApiInfo apiInfo, ApiKey apiKey, int page,int batchSize){
         Gson gson = new Gson();
+        int pageSum = page;
 
         while(true){
             Map<String,String> queryParam = new HashMap<>();
-            queryParam.put("page",String.valueOf(page));
+            queryParam.put("page",String.valueOf(pageSum));
             WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(),apiInfo.getApiHost(), apiInfo.getApiUrl(),queryParam);
 
             String response = webclientCallService.webclientGetWithTokenWithPageParam(webClientDTO,apiKey);
@@ -103,7 +86,7 @@ public class UserInfoServiceImpl implements UserInfoService {
                     userInfo.setApiKeyId(apiKey.getApiKeyId());
                 }
                 userInfoRepository.saveAll(userInfoList);
-                page++;
+                pageSum += batchSize;
             }
             try {
                 Thread.sleep(1200);
