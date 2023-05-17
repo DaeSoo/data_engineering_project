@@ -10,9 +10,9 @@ public interface MatchInfoService {
 
     MatchInfo matchInfoSave(MatchInfo matchInfo);
 
-    Boolean matchApiRequest(ApiKey apiKey, String apiName);
+    void matchApiRequest(ApiKey apiKey, String apiName, String startDate, String endDate);
 
-    void createThread(String method);
+    int createThread(String method, String startDate, String endDate);
 
     List<MatchInfo> getMatchInfoList();
 

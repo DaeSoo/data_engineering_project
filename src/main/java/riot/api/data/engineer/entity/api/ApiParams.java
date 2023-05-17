@@ -1,17 +1,22 @@
 package riot.api.data.engineer.entity.api;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 
 @Entity(name = "api_params")
+@Getter
+@Setter
 public class ApiParams {
     /** 시퀀스 **/
     @Id
     @Column(name = "api_params_id")
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    Long api_params_id;
+    Long apiParamsId;
     /** ApiInfo 테이블 **/
     @Column(name = "api_info_id")
-    Long ApiInfoId;
+    Long apiInfoId;
     /** 파라미터 명 **/
     @Column(name = "name")
     String name;
@@ -25,4 +30,15 @@ public class ApiParams {
     @Column(name = "is_required")
     Boolean isRequired;
 
+    /** Api key **/
+    @Column(name = "api_key")
+    String apiKey;
+
+    /** Api Value **/
+    @Column(name = "api_value")
+    String apiValue;
+
+    /** 날짜 파라미터 여부 **/
+    @Column(name = "date_param_required")
+    Boolean dateParamRequired;
 }
