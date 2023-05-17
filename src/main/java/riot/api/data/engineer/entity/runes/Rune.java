@@ -1,5 +1,6 @@
 package riot.api.data.engineer.entity.runes;
 
+import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,4 +13,6 @@ public class Rune {
     String key;
     String name;
     List<Slots> slots;
+    @SerializedName("currentVersion")
+    String version;
 }

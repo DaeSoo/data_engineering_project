@@ -42,6 +42,7 @@ public class RunesController {
         RuneList runeList = runeService.setRuneList(response);
         Gson gson = new Gson();
         runeList.getRuneList().forEach(rune -> {
+            rune.setVersion(version.getVersion().replaceAll("\"",""));
             String json = gson.toJson(rune);
             myProducer.sendMessage(kafkaInfo, json);
         });

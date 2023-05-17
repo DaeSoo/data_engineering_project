@@ -48,6 +48,7 @@ public class ChampionsController {
         Gson gson = new Gson();
 
         for (Data data : datalist) {
+            data.setVersion(champions.getVersion().replaceAll("\"",""));
             String json = gson.toJson(data);
             myProducer.sendMessage(kafkaInfo, json);
         }

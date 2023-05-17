@@ -1,5 +1,6 @@
 package riot.api.data.engineer.entity.items;
 
+import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,5 +18,6 @@ public class Item {
     List<String> tags;
     Integer depth;
     Stats stats;
+    @SerializedName("currentVersion")
     String version;
 }

@@ -31,7 +31,7 @@ public class Data {
     private String key;
     @SerializedName("id")
     private String id;
-    @SerializedName("version")
+    @SerializedName("currentVersion")
     private String version;
 
     @Getter
