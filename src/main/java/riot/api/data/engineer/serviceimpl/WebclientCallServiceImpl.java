@@ -2,11 +2,13 @@ package riot.api.data.engineer.serviceimpl;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import riot.api.data.engineer.dto.MatchInfoParam;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.api.ApiKey;
 import riot.api.data.engineer.service.WebclientCallService;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,9 +33,7 @@ public class WebclientCallServiceImpl implements WebclientCallService {
 
     @Override
     public String webclientGetWithVersion(WebClientDTO webClientDTO, String version) {
-        return webClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
+        return webClient.get().uri(uriBuilder -> uriBuilder
                         .scheme(webClientDTO.getScheme())
                         .host(webClientDTO.getHost())
                         .path(webClientDTO.getPath())
@@ -65,20 +65,9 @@ public class WebclientCallServiceImpl implements WebclientCallService {
     }
 
     @Override
-    public List<String> webclientQueryParamGet(WebClientDTO webClientDTO, ApiKey apikey, Map<String, String> queryParam, String apiName, MatchInfoParam matchInfoParam) {
-        return webClient.get().uri(uriBuilder -> uriBuilder
-                .scheme(webClientDTO.getScheme())
-                .host(webClientDTO.getHost())
-                .path(webClientDTO.getPath())
-//                .queryParam("startTime" ,matchInfoParam.getStartTime())
-//                .queryParam("endTime", matchInfoParam.getEndTime())
-                .queryParam("type", matchInfoParam.getType())
-                .queryParam("count", matchInfoParam.getCount())
-                .queryParam("start", matchInfoParam.getStart())
-                .queryParamIfPresent("page", Optional.ofNullable(webClientDTO.getQueryParam().get("page")))
-                .build(queryParam.get(apiName))).header(apikey.getKeyName(), apikey.getApiKey()).retrieve().bodyToMono(List.class).block();
+    public List webclientQueryParamGet(WebClientDTO webClientDTO, ApiKey apikey, String apiName, Map<String, String> queryParams) {
+        return webClient.get().uri(createApiListUri(webClientDTO,queryParams, apiName)).header(apikey.getKeyName(), apikey.getApiKey()).retrieve().bodyToMono(List.class).block();
     }
-
     @Override
     public String webclientGetWithParam(WebClient webClient, WebClientDTO webClientDTO) {
         return webClient.get().uri(uriBuilder -> uriBuilder
@@ -99,4 +88,22 @@ public class WebclientCallServiceImpl implements WebclientCallService {
                 .build()).header(apikey.getKeyName(), apikey.getApiKey()).retrieve().bodyToMono(String.class).block();
     }
 
+    public URI createApiListUri(WebClientDTO webClientDTO, Map<String, String> queryParams, String apiName){
+        UriBuilder uriBuilder = getUriBuilder(webClientDTO);
+        if(queryParams.size() != 0){
+            for(Map.Entry<String, String> entry : queryParams.entrySet()){
+                uriBuilder.queryParam(entry.getKey(), entry.getValue());
+            }
+            return uriBuilder.queryParamIfPresent("page", Optional.ofNullable(webClientDTO.getQueryParam().get("page")))
+                    .build(webClientDTO.getQueryParam().get(apiName));
+        }else {
+            return uriBuilder.build();
+        }
+    }
+    public UriBuilder getUriBuilder(WebClientDTO webClientDTO){
+        return UriComponentsBuilder.newInstance()
+                .scheme(webClientDTO.getScheme())
+                .host(webClientDTO.getHost())
+                .path(webClientDTO.getPath());
+    }
 }

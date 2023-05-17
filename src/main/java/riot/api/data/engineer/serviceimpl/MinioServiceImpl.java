@@ -2,7 +2,6 @@ package riot.api.data.engineer.serviceimpl;
 
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
-import io.minio.ObjectWriteResponse;
 import io.minio.PutObjectArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
