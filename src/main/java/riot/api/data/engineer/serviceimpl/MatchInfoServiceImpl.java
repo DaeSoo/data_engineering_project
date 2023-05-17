@@ -9,10 +9,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import riot.api.data.engineer.dto.FileDto;
 import riot.api.data.engineer.dto.MatchInfoParam;
 import riot.api.data.engineer.dto.WebClientDTO;
-import riot.api.data.engineer.entity.*;
+import riot.api.data.engineer.entity.KafkaInfo;
+import riot.api.data.engineer.entity.MatchInfo;
+import riot.api.data.engineer.entity.MyProducer;
+import riot.api.data.engineer.entity.UserInfoDetail;
 import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.entity.api.ApiKey;
 import riot.api.data.engineer.entity.matchdetail.Info;
@@ -23,9 +25,6 @@ import riot.api.data.engineer.repository.MatchInfoRepository;
 import riot.api.data.engineer.service.*;
 import riot.api.data.engineer.utils.UtilManager;
 
-
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
@@ -33,7 +32,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
@@ -52,23 +54,20 @@ public class MatchInfoServiceImpl implements MatchInfoService {
     private final MinioService minioService;
 
 
-
-
     @Override
-    public MatchInfo matchInfoSave(MatchInfo matchInfo){
+    public MatchInfo matchInfoSave(MatchInfo matchInfo) {
         return matchInfoRepository.save(matchInfo);
     }
 
     /**
-     *
-     * @param apiKey ApiKey Entity
+     * @param apiKey  ApiKey Entity
      * @param apiName ApiInfo apiName(method명)
      */
     @Override
     public Boolean matchApiRequest(ApiKey apiKey, String apiName) {
         boolean let = false;
         MatchInfoParam matchInfoParam = setDateParam();
-        try{
+        try {
             List<UserInfoDetail> userInfoDetailList = userInfoDetailService.userInfoDeatilList(apiKey.getApiKeyId());
             ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
             for (UserInfoDetail userInfoDetail : userInfoDetailList) {
@@ -80,20 +79,21 @@ public class MatchInfoServiceImpl implements MatchInfoService {
             /*
                 RiotApi 1분 호출 limit을 맞추기 위한 Thread.sleep
              */
-                Thread.sleep(1500);
+                Thread.sleep(1200);
             }
             let = true;
-        }catch (InterruptedException e){
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.info("Exception : {}", e.getMessage());
         }
         return let;
     }
+
     @Override
-    public void createThread(String method){
+    public void createThread(String method) {
         List<ApiKey> apiKeyList = apiKeyService.findList();
         ExecutorService executorService = Executors.newFixedThreadPool(apiKeyList.size());
-        for(ApiKey apiKey : apiKeyList){
+        for (ApiKey apiKey : apiKeyList) {
             createSubmit(executorService, apiKey, method);
         }
         executorService.shutdown();
@@ -106,35 +106,22 @@ public class MatchInfoServiceImpl implements MatchInfoService {
 
 
     @Override
-    public void apiCallBatch(ApiInfo apiInfo, List<ApiKey> apiKeyList) {
-        try{
-            ExecutorService executorService = Executors.newFixedThreadPool(apiKeyList.size());
-            KafkaInfo kafkaInfo = kafkaInfoService.findOneByApiInfoId(apiInfo.getApiInfoId());
-            for(ApiKey apiKey : apiKeyList){
-                Runnable task = () -> {
-                    List<MatchInfo> matchInfos = matchInfoQueryRepository.findListByApiKeyId(apiKey.getApiKeyId());
-                    apiCallRepeat(apiInfo, apiKey, matchInfos, kafkaInfo);
-                };
-                executorService.submit(task);
-            }
-            executorService.shutdown();
-        }catch (Exception e){
-            executorService.shutdownNow();
-            log.info(e.getMessage());
-        }
-    }
+    public int apiCallBatch(ApiInfo apiInfo, List<ApiKey> apiKeyList) {
+        int apiKeyCount = apiKeyList.size();
+        try {
+            ExecutorService executorService = Executors.newFixedThreadPool(apiKeyCount);
+            List<MatchInfo> matchInfoList = matchInfoRepository.findAll();
 
-    @Override
-    public int apiCallBatchTest(ApiInfo apiInfo, List<ApiKey> apiKeyList) {
-        try{
+            List<List<MatchInfo>> partionMatchInfoList = partitionList(matchInfoList, apiKeyCount);
             List<Callable<Integer>> tasks = new ArrayList<>();
-
-            ExecutorService executorService = Executors.newFixedThreadPool(apiKeyList.size());
             KafkaInfo kafkaInfo = kafkaInfoService.findOneByApiInfoId(apiInfo.getApiInfoId());
-            for(ApiKey apiKey : apiKeyList){
+
+
+            for (int i = 0; i < apiKeyCount; i++) {
+                List<MatchInfo> matchInfoPartition = partionMatchInfoList.get(i);
+                ApiKey apiKey = apiKeyList.get(i);
                 Callable<Integer> task = () -> {
-                    List<MatchInfo> matchInfos = matchInfoQueryRepository.findListByApiKeyId(apiKey.getApiKeyId());
-                    apiCallRepeatTest(apiInfo, apiKey, matchInfos, kafkaInfo);
+                    apiCallRepeat(apiInfo, apiKey, matchInfoPartition, kafkaInfo);
                     return 1;
                 };
                 tasks.add(task);
@@ -142,51 +129,26 @@ public class MatchInfoServiceImpl implements MatchInfoService {
             executorService.invokeAll(tasks);
             executorService.shutdown();
             return 2;
-        }catch (Exception e){
+        } catch (Exception e) {
             executorService.shutdownNow();
             log.info(e.getMessage());
             return -1;
         }
-
     }
 
-
-    protected void apiCallRepeat(ApiInfo apiInfo, ApiKey apiKey,List<MatchInfo> matchInfos,KafkaInfo kafkaInfo){
-
-        for(MatchInfo matchInfo : matchInfos){
-            WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(),apiInfo.getApiHost(), apiInfo.getApiUrl());
-            String response = webclientCallService.webclientGetWithMatchIdWithToken(webClientDTO,apiKey,matchInfo.getId());
-            if(StringUtils.isEmpty(response)){
-                continue;
-            }
-            else{
-                /**** 원천 데이터 전송 ****/
-                minioService.save(minioService.uploadInputStream(matchInfo.getId(), response));
-                /**** 카프카 전송 ****/
-                myProducer.sendMessage(kafkaInfo,response);
-            }
-            try {
-                Thread.sleep(1200);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    protected void apiCallRepeatTest(ApiInfo apiInfo, ApiKey apiKey,List<MatchInfo> matchInfos,KafkaInfo kafkaInfo){
+    protected void apiCallRepeat(ApiInfo apiInfo, ApiKey apiKey, List<MatchInfo> matchInfos, KafkaInfo kafkaInfo) {
         Gson gson = new Gson();
-        for(MatchInfo matchInfo : matchInfos){
-            WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(),apiInfo.getApiHost(), apiInfo.getApiUrl());
-            String response = webclientCallService.webclientGetWithMatchIdWithToken(webClientDTO,apiKey,matchInfo.getId());
-            if(StringUtils.isEmpty(response)){
+        for (MatchInfo matchInfo : matchInfos) {
+            WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(), apiInfo.getApiHost(), apiInfo.getApiUrl());
+            String response = webclientCallService.webclientGetWithMatchIdWithToken(webClientDTO, apiKey, matchInfo.getId());
+            if (StringUtils.isEmpty(response)) {
                 continue;
-            }
-            else{
+            } else {
                 /**** 카프카 전송 ****/
                 MatchDetail matchDetail = setMatchInfoDetail(response);
                 String processedResponse = gson.toJson(matchDetail);
 
-                myProducer.sendMessage(kafkaInfo,processedResponse);
+                myProducer.sendMessage(kafkaInfo, processedResponse);
             }
             try {
                 Thread.sleep(1200);
@@ -201,10 +163,10 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         JsonObject jsonObject = new UtilManager().StringToJsonObject(response);
         MatchDetail matchDetail = new MatchDetail();
 
-        Info infoData = gson.fromJson(jsonObject.getAsJsonObject("info"),Info.class);
+        Info infoData = gson.fromJson(jsonObject.getAsJsonObject("info"), Info.class);
         matchDetail.setInfo(infoData);
 
-        MetaData metaData = gson.fromJson(jsonObject.getAsJsonObject("metadata"),MetaData.class);
+        MetaData metaData = gson.fromJson(jsonObject.getAsJsonObject("metadata"), MetaData.class);
         matchDetail.setMetadata(metaData);
 
         return matchDetail;
@@ -214,17 +176,18 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         Gson gson = new Gson();
         JsonObject jsonObject = new UtilManager().StringToJsonObject(response);
 
-        Info infoData = gson.fromJson(jsonObject.getAsJsonObject("info"),Info.class);
+        Info infoData = gson.fromJson(jsonObject.getAsJsonObject("info"), Info.class);
 
         return infoData;
     }
 
-    public void createSubmit(ExecutorService executorService, ApiKey apiKey, String apiName){
+    public void createSubmit(ExecutorService executorService, ApiKey apiKey, String apiName) {
         executorService.submit(() -> matchApiRequest(apiKey, apiName));
     }
-    public MatchInfo jsonToEntity(String response, Long apiKeyId){
+
+    public MatchInfo jsonToEntity(String response, Long apiKeyId) {
         ObjectMapper objectMapper = new ObjectMapper();
-        try{
+        try {
             MatchInfo matchInfo = objectMapper.readValue(response, MatchInfo.class);
             matchInfo.setApiKeyId(apiKeyId);
             return matchInfo;
@@ -237,14 +200,24 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         }
     }
 
-    public void listToEntity(List<String> response, Long apiKeyId){
-        for(String puuid : response){
+    private static <T> List<List<T>> partitionList(List<T> list, int partitionSize) {
+        List<List<T>> partitions = new ArrayList<>();
+        int size = list.size();
+        for (int i = 0; i < size; i += partitionSize) {
+            int end = Math.min(size, i + partitionSize);
+            partitions.add(list.subList(i, end));
+        }
+        return partitions;
+    }
+
+    public void listToEntity(List<String> response, Long apiKeyId) {
+        for (String puuid : response) {
             MatchInfo matchInfo = new MatchInfo(puuid, apiKeyId);
             matchInfoSave(matchInfo);
         }
     }
 
-    public MatchInfoParam setDateParam(){
+    public MatchInfoParam setDateParam() {
         return new MatchInfoParam(LocalDateTime.now().minusDays(1).with(LocalTime.of(0, 0, 0)).toEpochSecond(ZoneOffset.UTC),
                 LocalDateTime.now().minusDays(1).with(LocalTime.of(23, 59, 59)).toEpochSecond(ZoneOffset.UTC),
                 "ranked",

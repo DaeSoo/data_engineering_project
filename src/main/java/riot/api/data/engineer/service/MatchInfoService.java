@@ -16,7 +16,6 @@ public interface MatchInfoService {
 
     List<MatchInfo> getMatchInfoList();
 
-    void apiCallBatch(ApiInfo apiInfo, List<ApiKey> apiKeyList);
+    int apiCallBatch(ApiInfo apiInfo, List<ApiKey> apiKeyList);
 
-    int apiCallBatchTest(ApiInfo apiInfo, List<ApiKey> apiKeyList);
 }

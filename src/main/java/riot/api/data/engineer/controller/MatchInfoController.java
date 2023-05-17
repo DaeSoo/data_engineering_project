@@ -31,13 +31,13 @@ public class MatchInfoController {
     }
 
     @GetMapping("detail")
-    public int getMatchDetailTest(){
+    public int getMatchDetail(){
         String apiName = "/match/detail";
 
         try{
             ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
             List<ApiKey> apiKeyList = apiKeyService.findList();
-            int response = matchInfoService.apiCallBatchTest(apiInfo, apiKeyList);
+            int response = matchInfoService.apiCallBatch(apiInfo, apiKeyList);
             return response;
         }
         catch (Exception e){
