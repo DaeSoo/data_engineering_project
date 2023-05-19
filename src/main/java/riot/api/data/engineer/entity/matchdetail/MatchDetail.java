@@ -14,5 +14,8 @@ public class MatchDetail {
     @SerializedName("metadata")
     private MetaData metadata;
 
+    @SerializedName("collect_date")
+    private String collectDate;
+
 }
 

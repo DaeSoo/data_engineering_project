@@ -82,7 +82,7 @@ public class MatchInfoServiceImpl implements MatchInfoService {
                 pathValiable.put(apiName, userInfoDetail.getPuuid());
                 WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(), apiInfo.getApiHost(), apiInfo.getApiUrl(), pathValiable);
                 List<String> response = webclientCallService.webclientQueryParamGet(webClientDTO, apiKey, apiName, queryParams);
-                listToEntity(response, apiKey.getApiKeyId());
+                listToEntity(response, apiKey.getApiKeyId(),startDate);
             /*
                 RiotApi 1분 호출 limit을 맞추기 위한 Thread.sleep
              */
@@ -163,6 +163,7 @@ public class MatchInfoServiceImpl implements MatchInfoService {
             } else {
                 /**** 카프카 전송 ****/
                 MatchDetail matchDetail = setMatchInfoDetail(response);
+                matchDetail.setCollectDate(matchInfo.getCollectDate());
                 String processedResponse = gson.toJson(matchDetail);
 
                 myProducer.sendMessage(kafkaInfo, processedResponse);
@@ -223,9 +224,9 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         return partitions;
     }
 
-    public void listToEntity(List<String> response, Long apiKeyId) {
+    public void listToEntity(List<String> response, Long apiKeyId,String startDate) {
         for (String puuid : response) {
-            MatchInfo matchInfo = new MatchInfo(puuid, apiKeyId);
+            MatchInfo matchInfo = new MatchInfo(puuid, apiKeyId,startDate);
             matchInfoSave(matchInfo);
         }
     }

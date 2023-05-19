@@ -23,4 +23,7 @@ public class MatchInfo extends BaseEntity{
     @Column(name = "api_key_id")
     private Long apiKeyId;
 
+    @Column(name = "collect_date")
+    private String collectDate;
+
 }
