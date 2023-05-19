@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import riot.api.data.engineer.entity.api.ApiKey;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,7 +14,6 @@ import javax.persistence.Id;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class MatchInfo extends BaseEntity{
 
     @Id
@@ -26,4 +26,13 @@ public class MatchInfo extends BaseEntity{
     @Column(name = "collect_date")
     private String collectDate;
 
+    @Column(name = "collect_complete_yn")
+    private Boolean collectCompleteYn;
+
+    public MatchInfo(String id, Long apiKeyId, String collectDate) {
+        this.id = id;
+        this.apiKeyId = apiKeyId;
+        this.collectDate = collectDate;
+        this.collectCompleteYn = Boolean.FALSE;
+    }
 }

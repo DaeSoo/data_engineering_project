@@ -88,9 +88,11 @@ public class MatchInfoServiceImpl implements MatchInfoService {
              */
                 Thread.sleep(1200);
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.info("Exception : {}", e.getMessage());
+        } catch (Exception e) {
+            log.info(" === ERROR === ");
+            log.info(e.getMessage());
+//            Thread.currentThread().interrupt();
+//            log.info("Exception : {}", e.getMessage());
         }
     }
     @Override
@@ -156,23 +158,32 @@ public class MatchInfoServiceImpl implements MatchInfoService {
     protected void apiCallRepeat(ApiInfo apiInfo, ApiKey apiKey, List<MatchInfo> matchInfos, KafkaInfo kafkaInfo) {
         Gson gson = new Gson();
         for (MatchInfo matchInfo : matchInfos) {
-            WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(), apiInfo.getApiHost(), apiInfo.getApiUrl());
-            String response = webclientCallService.webclientGetWithMatchIdWithToken(webClientDTO, apiKey, matchInfo.getId());
-            if (StringUtils.isEmpty(response)) {
-                continue;
-            } else {
-                /**** 카프카 전송 ****/
-                MatchDetail matchDetail = setMatchInfoDetail(response);
-                matchDetail.setCollectDate(matchInfo.getCollectDate());
-                String processedResponse = gson.toJson(matchDetail);
+            try{
+                WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(), apiInfo.getApiHost(), apiInfo.getApiUrl());
+                String response = webclientCallService.webclientGetWithMatchIdWithToken(webClientDTO, apiKey, matchInfo.getId());
+                if (StringUtils.isEmpty(response)) {
+                    continue;
+                } else {
+                    /**** 카프카 전송 ****/
+                    MatchDetail matchDetail = setMatchInfoDetail(response);
+                    matchDetail.setCollectDate(matchInfo.getCollectDate());
+                    String processedResponse = gson.toJson(matchDetail);
 
-                myProducer.sendMessage(kafkaInfo, processedResponse);
+                    myProducer.sendMessage(kafkaInfo, processedResponse);
+                    matchInfo.setCollectCompleteYn(true);
+                    matchInfoSave(matchInfo);
+                }
+                try {
+                    Thread.sleep(1200);
+                } catch (InterruptedException e) {
+
+                }
+            }catch (Exception e){
+                log.info("=== ERROR ===");
+                log.info(" ApiKey : "  + matchInfo.getApiKeyId());
+                log.info("ID : " + matchInfo.getId());
             }
-            try {
-                Thread.sleep(1200);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+
         }
     }
 
