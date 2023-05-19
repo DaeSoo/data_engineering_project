@@ -214,13 +214,24 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         }
     }
 
-    private static <T> List<List<T>> partitionList(List<T> list, int partitionSize) {
+    private static <T> List<List<T>> partitionList(List<T> list, int apiKeyCount) {
         List<List<T>> partitions = new ArrayList<>();
         int size = list.size();
-        for (int i = 0; i < size; i += partitionSize) {
-            int end = Math.min(size, i + partitionSize);
-            partitions.add(list.subList(i, end));
+        int partitionSize = size / apiKeyCount;
+        int remainder = size % apiKeyCount;
+        int startIndex = 0;
+
+        for (int i = 0; i < apiKeyCount; i ++) {
+            int endIndex = startIndex + partitionSize;
+            if (remainder > 0) {
+                endIndex++;
+                remainder--;
+            }
+            endIndex = Math.min(endIndex, size);
+            partitions.add(list.subList(startIndex, endIndex));
+            startIndex = endIndex;
         }
+
         return partitions;
     }
 
