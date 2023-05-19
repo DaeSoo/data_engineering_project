@@ -31,10 +31,7 @@ import riot.api.data.engineer.service.WebclientCallService;
 import riot.api.data.engineer.utils.UtilManager;
 
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -269,10 +266,10 @@ public class MatchInfoServiceImpl implements MatchInfoService {
     }
 
     public String setStartDate(String startDate){
-        return String.valueOf(LocalDateTime.of(LocalDate.parse(startDate),LocalTime.of(0,0,0)).toEpochSecond(ZoneOffset.UTC));
+        return String.valueOf(LocalDateTime.of(LocalDate.parse(startDate),LocalTime.of(0,0,0)).atZone(ZoneId.of("Asia/Seoul")).toEpochSecond());
     }
 
     public String setEndDate(String endDate){
-        return String.valueOf(LocalDateTime.of(LocalDate.parse(endDate),LocalTime.of(23,59,59)).toEpochSecond(ZoneOffset.UTC));
+        return String.valueOf(LocalDateTime.of(LocalDate.parse(endDate),LocalTime.of(23,59,59)).atZone(ZoneId.of("Asia/Seoul")).toEpochSecond());
     }
 }
