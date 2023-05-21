@@ -20,6 +20,7 @@ import riot.api.data.engineer.entity.api.ApiParams;
 import riot.api.data.engineer.entity.matchdetail.Info;
 import riot.api.data.engineer.entity.matchdetail.MatchDetail;
 import riot.api.data.engineer.entity.matchdetail.MetaData;
+import riot.api.data.engineer.repository.MatchInfoQueryRepository;
 import riot.api.data.engineer.repository.MatchInfoRepository;
 import riot.api.data.engineer.service.ApiInfoService;
 import riot.api.data.engineer.service.ApiKeyService;
@@ -53,6 +54,7 @@ public class MatchInfoServiceImpl implements MatchInfoService {
     private final MyProducer myProducer;
     private final ExecutorService executorService;
     private final ApiParamsService apiParamsService;
+    private final MatchInfoQueryRepository matchInfoQueryRepository;
 
 
 
@@ -126,7 +128,7 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         int apiKeyCount = apiKeyList.size();
         try {
             ExecutorService executorService = Executors.newFixedThreadPool(apiKeyCount);
-            List<MatchInfo> matchInfoList = matchInfoRepository.findAll();
+            List<MatchInfo> matchInfoList = matchInfoQueryRepository.findMatchInfoByCollectCompleteYn();
 
             List<List<MatchInfo>> partionMatchInfoList = partitionList(matchInfoList, apiKeyCount);
             List<Callable<Integer>> tasks = new ArrayList<>();
