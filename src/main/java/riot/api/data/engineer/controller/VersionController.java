@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.WebClient;
 import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.Version;
 import riot.api.data.engineer.entity.api.ApiInfo;
@@ -31,12 +30,14 @@ public class VersionController {
     @GetMapping("/get")
     public List<Version> getVersion() {
         /** yml에서 관리하는 것으로 변경 예정**/
-        String apiName = "/ddragon/version/get";
+//        String apiName = "/ddragon/version/get";
 
-        ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
+        ApiInfo apiInfo = apiInfoService.findOneByName(new Exception().getStackTrace()[0].getMethodName());
 
-        String response = webclientCallService.webclientGet(new WebClientDTO(apiInfo.getApiScheme(), apiInfo.getApiHost(), apiInfo.getApiUrl()));
-
+        String response = webclientCallService.getWebClientToString(WebClientDTO.builder()
+                .scheme(apiInfo.getApiScheme())
+                .host(apiInfo.getApiHost())
+                .path(apiInfo.getApiUrl()).build(), null);
         JsonArray jsonArrayResponse = new UtilManager().StringToJsonArray(response);
 
         List<Version> versionList = new ArrayList<>();

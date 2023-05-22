@@ -50,8 +50,12 @@ public class ChampionsServiceImpl implements ChampionsService {
 
     @Override
     public String getChampionsInfo(ApiInfo apiInfo, Version version) {
-        WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(),apiInfo.getApiHost(),apiInfo.getApiUrl());
-
-        return webclientCallService.webclientGetWithVersion(webClientDTO,version.getVersion());
+        List<String> pathVariable = new ArrayList<>();
+        pathVariable.add(version.getVersion());
+        WebClientDTO webClientDTO = WebClientDTO.builder().scheme(apiInfo.getApiScheme())
+                .host(apiInfo.getApiHost())
+                .path(apiInfo.getApiUrl())
+                .pathVariable(pathVariable).build();
+        return webclientCallService.getWebClientToString(webClientDTO, null);
     }
 }

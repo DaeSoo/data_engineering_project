@@ -13,7 +13,14 @@ import riot.api.data.engineer.entity.Version;
 import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.entity.spells.Spell;
 import riot.api.data.engineer.entity.spells.Spells;
-import riot.api.data.engineer.service.*;
+import riot.api.data.engineer.service.ApiInfoService;
+import riot.api.data.engineer.service.KafkaInfoService;
+import riot.api.data.engineer.service.SpellService;
+import riot.api.data.engineer.service.VersionService;
+import riot.api.data.engineer.service.WebclientCallService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -37,8 +44,10 @@ public class SpellsController {
         Version version = versionService.findOneByName();
         KafkaInfo kafkaInfo = kafkaInfoService.findOneByApiInfoId(apiInfo.getApiInfoId());
 
-        String response = webclientCallService.webclientGetWithVersion(new WebClientDTO(apiInfo.getApiScheme(), apiInfo.getApiHost(), apiInfo.getApiUrl()), version.getVersion());
+        List<String> pathVariable = new ArrayList<>();
+        pathVariable.add(version.getVersion());
 
+        String response = webclientCallService.getWebClientToString(WebClientDTO.builder().scheme(apiInfo.getApiScheme()).host(apiInfo.getApiHost()).path(apiInfo.getApiUrl()).pathVariable(pathVariable).build(), null);
         Spells spells = spellService.setSpells(response);
 
         Gson gson = new Gson();

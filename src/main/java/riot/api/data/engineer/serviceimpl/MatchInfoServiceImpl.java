@@ -33,7 +33,10 @@ import riot.api.data.engineer.utils.EpochTimestampConverter;
 import riot.api.data.engineer.utils.UtilManager;
 
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,10 +81,16 @@ public class MatchInfoServiceImpl implements MatchInfoService {
             List<ApiParams> apiParamsList = apiParamsService.getApiParamsList(apiInfo.getApiInfoId());
             Map<String, String> queryParams = setParams(apiParamsList, startDate, endDate);
             for (UserInfoDetail userInfoDetail : userInfoDetailList) {
-                Map<String, String> pathValiable = new HashMap<>();
-                pathValiable.put(apiName, userInfoDetail.getPuuid());
-                WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(), apiInfo.getApiHost(), apiInfo.getApiUrl(), pathValiable);
-                List<String> response = webclientCallService.webclientQueryParamGet(webClientDTO, apiKey, apiName, queryParams);
+                List<String> pathVariable = new ArrayList<>();
+                pathVariable.add(userInfoDetail.getPuuid());
+                WebClientDTO webClientDTO = WebClientDTO.builder()
+                        .apiName(apiName)
+                        .scheme(apiInfo.getApiScheme())
+                        .host(apiInfo.getApiHost())
+                        .path(apiInfo.getApiUrl())
+                        .pathVariable(pathVariable)
+                        .queryParam(queryParams).build();
+                List<String> response = webclientCallService.getWebClientToList(webClientDTO, apiKey);
                 listToEntity(response, apiKey.getApiKeyId());
             /*
                 RiotApi 1분 호출 limit을 맞추기 위한 Thread.sleep
@@ -91,8 +100,8 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         } catch (Exception e) {
             log.info(" === ERROR === ");
             log.info(e.getMessage());
-//            Thread.currentThread().interrupt();
-//            log.info("Exception : {}", e.getMessage());
+        }finally {
+            Thread.currentThread().interrupt();
         }
     }
     @Override
@@ -100,8 +109,8 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         List<Callable<Integer>> tasks = new ArrayList<>();
         List<ApiKey> apiKeyList = apiKeyService.findList();
         ExecutorService executorService = Executors.newFixedThreadPool(apiKeyList.size());
-        try{
-            for(ApiKey apiKey : apiKeyList){
+        try {
+            for (ApiKey apiKey : apiKeyList) {
                 Callable<Integer> task = () -> {
                     matchApiRequest(apiKey, method, startDate, endDate);
                     return 1;
@@ -111,7 +120,7 @@ public class MatchInfoServiceImpl implements MatchInfoService {
             executorService.invokeAll(tasks);
             executorService.shutdown();
             return 2;
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             log.info(e.getMessage());
             executorService.shutdown();
             return -1;
@@ -159,8 +168,13 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         Gson gson = new Gson();
         for (MatchInfo matchInfo : matchInfos) {
             try{
-                WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(), apiInfo.getApiHost(), apiInfo.getApiUrl());
-                String response = webclientCallService.webclientGetWithMatchIdWithToken(webClientDTO, apiKey, matchInfo.getId());
+                List<String> path = new ArrayList<>();
+                path.add(matchInfo.getId());
+                WebClientDTO webClientDTO = WebClientDTO.builder().scheme(apiInfo.getApiScheme())
+                        .host(apiInfo.getApiHost())
+                        .path(apiInfo.getApiUrl())
+                        .pathVariable(path).build();
+                String response = webclientCallService.getWebClientToString(webClientDTO, apiKey);
                 if (StringUtils.isEmpty(response)) {
                     continue;
                 } else {
@@ -269,7 +283,7 @@ public class MatchInfoServiceImpl implements MatchInfoService {
     }
 
     public String setStartDate(String startDate){
-        return String.valueOf(LocalDateTime.of(LocalDate.parse(startDate),LocalTime.of(0,0,0)).atZone(ZoneId.of("Asia/Seoul")).toEpochSecond());
+        return String.valueOf(LocalDateTime.of(LocalDate.parse(startDate), LocalTime.of(0,0,0)).atZone(ZoneId.of("Asia/Seoul")).toEpochSecond());
     }
 
     public String setEndDate(String endDate){
