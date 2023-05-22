@@ -72,11 +72,11 @@ public class UserInfoServiceImpl implements UserInfoService {
         int pageSum = page;
         try{
             while(true){
-                Map<String,String> queryParam = new HashMap<>();
-                queryParam.put("page",String.valueOf(pageSum));
-                WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(),apiInfo.getApiHost(), apiInfo.getApiUrl(),queryParam);
+                Map<String,String> paging = new HashMap<>();
+                paging.put("page",String.valueOf(pageSum));
+                WebClientDTO webClientDTO = WebClientDTO.builder().scheme(apiInfo.getApiScheme()).host(apiInfo.getApiHost()).path(apiInfo.getApiUrl()).paging(paging).build();
 
-                String response = webclientCallService.webclientGetWithTokenWithPageParam(webClientDTO,apiKey);
+                String response = webclientCallService.getWebClientToString(webClientDTO,apiKey);
                 List<UserInfo> userInfoList = gson.fromJson(response, new TypeToken<List<UserInfo>>(){}.getType());
 
                 if(CollectionUtils.isEmpty(userInfoList)){

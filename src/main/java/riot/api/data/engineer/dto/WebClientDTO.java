@@ -1,33 +1,23 @@
 package riot.api.data.engineer.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 import java.util.Map;
 
 @Setter
 @Getter
+@Builder
 public class WebClientDTO {
     private static final String schemeHttps = "https";
     String scheme;
     String host;
     String path;
-
-//    List<Map<String,Object>> queryParam;
-
+    String apiName;
+    List<String> pathVariable;
     Map<String,String> queryParam;
-
-    public WebClientDTO(String scheme,String host,String path,Map<String,String> queryParam){
-        this.scheme = scheme;
-        this.host = host;
-        this.path = path;
-        this.queryParam = queryParam;
-    }
-
-    public WebClientDTO(String scheme,String host,String path){
-        this.scheme = scheme;
-        this.host = host;
-        this.path = path;
-    }
-
+    Map<String,String> paging;
 
 }

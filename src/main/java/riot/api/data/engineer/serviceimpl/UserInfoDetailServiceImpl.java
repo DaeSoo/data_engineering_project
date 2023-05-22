@@ -13,13 +13,15 @@ import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.entity.api.ApiKey;
 import riot.api.data.engineer.repository.UserInfoDetailQueryRepository;
 import riot.api.data.engineer.repository.UserInfoDetailRepository;
-import riot.api.data.engineer.service.*;
+import riot.api.data.engineer.service.ApiInfoService;
+import riot.api.data.engineer.service.ApiKeyService;
+import riot.api.data.engineer.service.UserInfoDetailService;
+import riot.api.data.engineer.service.UserInfoService;
+import riot.api.data.engineer.service.WebclientCallService;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -76,10 +78,13 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
             List<UserInfo> userInfoList = userInfoService.getUserInfoList(apiKey.getApiKeyId(), "N");
             ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
             for (UserInfo userInfo : userInfoList) {
-                Map<String, String> queryParam = new HashMap<>();
-                queryParam.put("summonerId", userInfo.getSummonerId());
-                WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(), apiInfo.getApiHost(), apiInfo.getApiUrl(), queryParam);
-                String response = webclientCallService.webclientQueryParamGet(webClientDTO, apiKey, queryParam);
+                List<String> pathVariable = new ArrayList<>();
+                pathVariable.add(userInfo.getSummonerId());
+                WebClientDTO webClientDTO = WebClientDTO.builder().scheme(apiInfo.getApiScheme())
+                        .host(apiInfo.getApiHost())
+                        .path(apiInfo.getApiUrl())
+                        .pathVariable(pathVariable).build();
+                String response = webclientCallService.getWebClientToString(webClientDTO, apiKey);
                 userInfoDetailSave(jsonToEntity(response, apiKey.getApiKeyId()));
                 /*
                  * UserInfoDetail Save가 됬을 경우

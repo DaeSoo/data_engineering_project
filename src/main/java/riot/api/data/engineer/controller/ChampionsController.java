@@ -7,7 +7,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.WebClient;
 import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.KafkaInfo;
 import riot.api.data.engineer.entity.MyProducer;
@@ -17,6 +16,7 @@ import riot.api.data.engineer.entity.champions.Champions;
 import riot.api.data.engineer.entity.champions.Data;
 import riot.api.data.engineer.service.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -40,8 +40,16 @@ public class ChampionsController {
         ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
         Version version = versionService.findOneByName();
         KafkaInfo kafkaInfo = kafkaInfoService.findOneByApiInfoId(apiInfo.getApiInfoId());
+        List<String> pathVariable = new ArrayList<>();
+        pathVariable.add(version.getVersion());
 
-        String response = webclientCallService.webclientGetWithVersion(new WebClientDTO(apiInfo.getApiScheme(), apiInfo.getApiHost(), apiInfo.getApiUrl()), version.getVersion());
+
+        String response = webclientCallService.getWebClientToString(WebClientDTO.builder()
+                .scheme(apiInfo.getApiScheme())
+                .host(apiInfo.getApiHost())
+                .path(apiInfo.getApiUrl())
+                .pathVariable(pathVariable)
+                .build(), null);
 
         Champions champions = championsService.setChampions(response);
         List<Data> datalist = champions.getDataList();
