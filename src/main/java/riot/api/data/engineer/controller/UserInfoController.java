@@ -3,10 +3,7 @@ package riot.api.data.engineer.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import riot.api.data.engineer.entity.UserInfo;
 import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.entity.api.ApiKey;
@@ -38,7 +35,7 @@ public class UserInfoController {
 
     }
 
-    @PutMapping("/user/entries/remove")
+    @DeleteMapping("/user/entries/remove")
     public String userEntriesRemove() {
         try{
             List<UserInfo> userInfoList = userInfoService.getUserInfoListAll();

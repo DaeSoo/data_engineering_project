@@ -23,16 +23,13 @@ public class MatchInfo extends BaseEntity{
     @Column(name = "api_key_id")
     private Long apiKeyId;
 
-    @Column(name = "collect_date")
-    private String collectDate;
 
     @Column(name = "collect_complete_yn")
     private Boolean collectCompleteYn;
 
-    public MatchInfo(String id, Long apiKeyId, String collectDate) {
+    public MatchInfo(String id, Long apiKeyId) {
         this.id = id;
         this.apiKeyId = apiKeyId;
-        this.collectDate = collectDate;
         this.collectCompleteYn = Boolean.FALSE;
     }
 }

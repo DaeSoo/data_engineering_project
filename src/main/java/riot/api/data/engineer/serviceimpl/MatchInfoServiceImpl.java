@@ -29,6 +29,7 @@ import riot.api.data.engineer.service.KafkaInfoService;
 import riot.api.data.engineer.service.MatchInfoService;
 import riot.api.data.engineer.service.UserInfoDetailService;
 import riot.api.data.engineer.service.WebclientCallService;
+import riot.api.data.engineer.utils.EpochTimestampConverter;
 import riot.api.data.engineer.utils.UtilManager;
 
 
@@ -81,7 +82,7 @@ public class MatchInfoServiceImpl implements MatchInfoService {
                 pathValiable.put(apiName, userInfoDetail.getPuuid());
                 WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(), apiInfo.getApiHost(), apiInfo.getApiUrl(), pathValiable);
                 List<String> response = webclientCallService.webclientQueryParamGet(webClientDTO, apiKey, apiName, queryParams);
-                listToEntity(response, apiKey.getApiKeyId(),startDate);
+                listToEntity(response, apiKey.getApiKeyId());
             /*
                 RiotApi 1분 호출 limit을 맞추기 위한 Thread.sleep
              */
@@ -163,9 +164,9 @@ public class MatchInfoServiceImpl implements MatchInfoService {
                 if (StringUtils.isEmpty(response)) {
                     continue;
                 } else {
-                    /**** 카프카 전송 ****/
                     MatchDetail matchDetail = setMatchInfoDetail(response);
-                    matchDetail.setCollectDate(matchInfo.getCollectDate());
+                    EpochTimestampConverter epochTimestampConverter = new EpochTimestampConverter(matchDetail.getInfo().getGameStartTimestamp());
+                    matchDetail.setCollectDate(epochTimestampConverter.convertToDateString());
                     String processedResponse = gson.toJson(matchDetail);
 
                     myProducer.sendMessage(kafkaInfo, processedResponse);
@@ -245,9 +246,9 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         return partitions;
     }
 
-    public void listToEntity(List<String> response, Long apiKeyId,String startDate) {
+    public void listToEntity(List<String> response, Long apiKeyId) {
         for (String puuid : response) {
-            MatchInfo matchInfo = new MatchInfo(puuid, apiKeyId,startDate);
+            MatchInfo matchInfo = new MatchInfo(puuid, apiKeyId);
             matchInfoSave(matchInfo);
         }
     }
@@ -255,11 +256,11 @@ public class MatchInfoServiceImpl implements MatchInfoService {
     public Map<String, String> setParams(List<ApiParams> apiParamsList, String startDate, String endDate){
         Map<String, String> map = new HashMap<>();
         for(ApiParams apiParams : apiParamsList){
-            if(Boolean.TRUE.equals(apiParams.getIsRequired())){
+            if(apiParams.getIsRequired()){
                 map.put(apiParams.getApiKey(), apiParams.getApiValue());
-                if(Boolean.TRUE.equals(apiParams.getDateParamRequired()) && "startTime".equals(apiParams.getApiKey())){
+                if(apiParams.getDateParamRequired() && "startTime".equals(apiParams.getApiKey())){
                     map.put(apiParams.getApiKey(), setStartDate(startDate));
-                }else if(Boolean.TRUE.equals(apiParams.getDateParamRequired()) && "endTime".equals(apiParams.getApiKey())){
+                }else if(apiParams.getDateParamRequired() && "endTime".equals(apiParams.getApiKey())){
                     map.put(apiParams.getApiKey(),  setEndDate(endDate));
                 }
             }

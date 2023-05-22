@@ -12,7 +12,6 @@ import javax.persistence.Id;
 @Setter
 @Getter
 public class UserInfo {
-    @Id
     @Column(name="summoner_id")
     @SerializedName("summonerId")
     private String summonerId;
@@ -37,6 +36,7 @@ public class UserInfo {
     @Column(name="league_points")
     @SerializedName("leaguePoints")
     private int leaguePoints;
+    @Id
     @Column(name="summoner_name")
     @SerializedName("summonerName")
     private String summonerName;
