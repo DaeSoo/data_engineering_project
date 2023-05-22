@@ -86,8 +86,9 @@ public class UserInfoServiceImpl implements UserInfoService {
                     for (UserInfo userInfo : userInfoList) {
                         userInfo.setUpdateYn("N");
                         userInfo.setApiKeyId(apiKey.getApiKeyId());
+
+                        userInfoRepository.save(userInfo);
                     }
-                    userInfoRepository.saveAll(userInfoList);
                     pageSum += batchSize;
                 }
                 try {
