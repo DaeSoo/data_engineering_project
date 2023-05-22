@@ -89,15 +89,18 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
                 userInfoService.save(userInfo);
             /*
                 RiotApi 1분 호출 limit을 맞추기 위한 Thread.sleep
-             */
-                Thread.sleep(1200);
+             */try{
+                    Thread.sleep(1200);
+                }
+                catch (InterruptedException e){
+                    Thread.currentThread().interrupt();
+                    log.info("Exception : {}", e.getMessage());
+                }
             }
             let = true;
-        }catch (InterruptedException e){
-            Thread.currentThread().interrupt();
-            log.info("Exception : {}", e.getMessage());
-        }finally {
-            Thread.currentThread().interrupt();
+        }catch (Exception e){
+            log.error(" === ERROR === ");
+            log.error(e.getMessage());
         }
         return let;
     }

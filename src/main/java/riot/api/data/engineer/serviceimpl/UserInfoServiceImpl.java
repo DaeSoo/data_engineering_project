@@ -3,6 +3,7 @@ package riot.api.data.engineer.serviceimpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -26,6 +27,7 @@ import java.util.concurrent.Executors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserInfoServiceImpl implements UserInfoService {
     private final Executor executor;
     private final ExecutorService executorService;
@@ -68,31 +70,36 @@ public class UserInfoServiceImpl implements UserInfoService {
     protected void apiCallRepeat(ApiInfo apiInfo, ApiKey apiKey, int page,int batchSize){
         Gson gson = new Gson();
         int pageSum = page;
+        try{
+            while(true){
+                Map<String,String> queryParam = new HashMap<>();
+                queryParam.put("page",String.valueOf(pageSum));
+                WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(),apiInfo.getApiHost(), apiInfo.getApiUrl(),queryParam);
 
-        while(true){
-            Map<String,String> queryParam = new HashMap<>();
-            queryParam.put("page",String.valueOf(pageSum));
-            WebClientDTO webClientDTO = new WebClientDTO(apiInfo.getApiScheme(),apiInfo.getApiHost(), apiInfo.getApiUrl(),queryParam);
+                String response = webclientCallService.webclientGetWithTokenWithPageParam(webClientDTO,apiKey);
+                List<UserInfo> userInfoList = gson.fromJson(response, new TypeToken<List<UserInfo>>(){}.getType());
 
-            String response = webclientCallService.webclientGetWithTokenWithPageParam(webClientDTO,apiKey);
-            List<UserInfo> userInfoList = gson.fromJson(response, new TypeToken<List<UserInfo>>(){}.getType());
-
-            if(CollectionUtils.isEmpty(userInfoList)){
-                break;
-            }
-            else{
-                for (UserInfo userInfo : userInfoList) {
-                    userInfo.setUpdateYn("N");
-                    userInfo.setApiKeyId(apiKey.getApiKeyId());
+                if(CollectionUtils.isEmpty(userInfoList)){
+                    break;
                 }
-                userInfoRepository.saveAll(userInfoList);
-                pageSum += batchSize;
+                else{
+                    for (UserInfo userInfo : userInfoList) {
+                        userInfo.setUpdateYn("N");
+                        userInfo.setApiKeyId(apiKey.getApiKeyId());
+                    }
+                    userInfoRepository.saveAll(userInfoList);
+                    pageSum += batchSize;
+                }
+                try {
+                    Thread.sleep(1200);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
-            try {
-                Thread.sleep(1200);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+        }
+        catch (Exception e){
+            log.error("=== ERROR ===");
+            log.error(e.getMessage());
         }
     }
 
