@@ -43,12 +43,12 @@ public class UserInfoController {
         try{
             List<UserInfo> userInfoList = userInfoService.getUserInfoListAll();
             if(CollectionUtils.isEmpty(userInfoList)){
-                return new ResponseEntity(new ApiResult(404,"List is Empty",null), HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(new ApiResult(404,"List is Empty",null), HttpStatus.BAD_REQUEST);
             }
             ApiResult apiResult = userInfoService.removeAll(userInfoList);
             return new ResponseEntity<>(apiResult,HttpStatus.OK);
         }catch (Exception e){
-            return new ResponseEntity(new ApiResult(500,e.getMessage(),null), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResult(500,e.getMessage(),null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

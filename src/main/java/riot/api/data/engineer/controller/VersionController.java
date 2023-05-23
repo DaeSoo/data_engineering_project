@@ -46,10 +46,10 @@ public class VersionController {
             List<Version> versionList = versionService.getVersionList(response);
             versionService.save(versionList);
 
-            return new ResponseEntity(new ApiResult(200, "success", versionList), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResult(200, "success", versionList), HttpStatus.OK);
         }
         catch (Exception e) {
-            return new ResponseEntity(new ApiResult(500, e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResult(500, e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -57,10 +57,10 @@ public class VersionController {
     public ResponseEntity<ApiResult> getCurrentVersion() {
         try{
             Version version = versionService.findOneByCurrentVersion();
-            return new ResponseEntity(new ApiResult(200, "success", version), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResult(200, "success", version), HttpStatus.OK);
         }
             catch (Exception e) {
-            return new ResponseEntity(new ApiResult(500, e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResult(500, e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
