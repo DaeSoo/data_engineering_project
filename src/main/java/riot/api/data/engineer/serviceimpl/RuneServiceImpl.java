@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import riot.api.data.engineer.entity.runes.Rune;
 import riot.api.data.engineer.entity.runes.RuneList;
 import riot.api.data.engineer.service.RuneService;
-import riot.api.data.engineer.service.WebclientCallService;
 import riot.api.data.engineer.utils.UtilManager;
 
 import java.util.ArrayList;
@@ -16,11 +15,6 @@ import java.util.List;
 
 @Service
 public class RuneServiceImpl implements RuneService {
-    private final WebclientCallService webclientCallService;
-
-    public RuneServiceImpl(WebclientCallService webclientCallService) {
-        this.webclientCallService = webclientCallService;
-    }
 
     @Override
     public RuneList setRuneList(String response) {

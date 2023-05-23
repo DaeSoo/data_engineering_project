@@ -5,7 +5,9 @@ import riot.api.data.engineer.entity.Version;
 import java.util.List;
 
 public interface VersionService {
-    Version findOneByName();
+    Version findOneByCurrentVersion();
 
     void save(List<Version> versionList);
+
+    List<Version> getVersionList(String response);
 }

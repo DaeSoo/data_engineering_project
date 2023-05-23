@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import riot.api.data.engineer.entity.spells.Spell;
 import riot.api.data.engineer.entity.spells.Spells;
 import riot.api.data.engineer.service.SpellService;
-import riot.api.data.engineer.service.WebclientCallService;
 import riot.api.data.engineer.utils.UtilManager;
 
 import java.util.ArrayList;
@@ -15,12 +14,6 @@ import java.util.List;
 
 @Service
 public class SpellServiceImpl implements SpellService {
-    private final WebclientCallService webclientCallService;
-
-    public SpellServiceImpl(WebclientCallService webclientCallService) {
-        this.webclientCallService = webclientCallService;
-    }
-
     @Override
     public Spells setSpells(String response) {
         JsonObject jsonObject = new UtilManager().StringToJsonObject(response);

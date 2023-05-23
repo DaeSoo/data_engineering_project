@@ -11,7 +11,7 @@ import riot.api.data.engineer.entity.Version;
 public class VersionQueryRepository {
     private final JPAQueryFactory queryFactory;
 
-    public Version findOne(){
+    public Version findOneByCurrentVersion(){
         QVersion qVersion = new QVersion("qVersion");
         return queryFactory.selectFrom(qVersion)
                 .where(

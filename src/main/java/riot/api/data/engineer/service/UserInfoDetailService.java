@@ -1,5 +1,7 @@
 package riot.api.data.engineer.service;
 
+import org.springframework.http.ResponseEntity;
+import riot.api.data.engineer.apiresult.ApiResult;
 import riot.api.data.engineer.entity.UserInfoDetail;
 import riot.api.data.engineer.entity.api.ApiKey;
 
@@ -10,13 +12,11 @@ public interface UserInfoDetailService {
 
     UserInfoDetail userInfoDetailSave(UserInfoDetail userInfoDetail);
 
-    Boolean userInfoDetailApiRequest(ApiKey apiKey, String apiName);
+    void userInfoDetailApiRequest(ApiKey apiKey, String apiName);
 
-    int createThread(String method);
+    ResponseEntity<ApiResult> createThread(String method);
 
     UserInfoDetail jsonToEntity(String response, Long apiKeyId);
-
-    void createTestMethod(String packageName, String methodName);
 
     List<UserInfoDetail> userInfoDeatilList();
 
