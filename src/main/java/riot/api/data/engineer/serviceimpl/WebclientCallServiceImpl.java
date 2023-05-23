@@ -69,30 +69,41 @@ public class WebclientCallServiceImpl implements WebclientCallService {
     @Override
     public String getWebClientToString(WebClientDTO webClientDTO, ApiKey apiKey){
         UriBuilder builder = createMapToParam(webClientDTO, getUriBuilder(webClientDTO));
-        URI uri = null;
-        if(CollectionUtils.isNotEmpty(webClientDTO.getPathVariable())){
-            uri = builder.build(webClientDTO.getPathVariable().toArray(new String[webClientDTO.getPathVariable().size()]));
-        }else
-            uri = builder.build();
-        if(ObjectUtils.isNotEmpty(apiKey)){
-            return webClient.get().uri(uri).header(apiKey.getKeyName(), apiKey.getApiKey()).retrieve().bodyToMono(String.class).block();
-        }
-        return webClient.get().uri(uri).retrieve().bodyToMono(String.class).block();
+        URI uri = createURI(builder, webClientDTO.getPathVariable());
+        return craeteHeader(uri,apiKey).retrieve().bodyToMono(String.class).block();
+//        if(ObjectUtils.isNotEmpty(apiKey)){
+//            return webClient.get().uri(uri).header(apiKey.getKeyName(), apiKey.getApiKey()).retrieve().bodyToMono(String.class).block();
+//        }
+//        return webClient.get().uri(uri).retrieve().bodyToMono(String.class).block();
     }
 
     @Override
     public List getWebClientToList(WebClientDTO webClientDTO, ApiKey apiKey){
         UriBuilder builder =  createMapToParam(webClientDTO, getUriBuilder(webClientDTO));
-        URI uri = null;
-        if(CollectionUtils.isNotEmpty(webClientDTO.getPathVariable())){
-            uri = builder.build(webClientDTO.getPathVariable().toArray(new String[webClientDTO.getPathVariable().size()]));
-        }else
-            uri = builder.build();
-        if(ObjectUtils.isNotEmpty(apiKey)){
-            return webClient.get().uri(uri).header(apiKey.getKeyName(), apiKey.getApiKey()).retrieve().bodyToMono(List.class).block();
-        }
-        return webClient.get().uri(builder.build()).retrieve().bodyToMono(List.class).block();
+        URI uri = createURI(builder, webClientDTO.getPathVariable());
+        return craeteHeader(uri,apiKey).retrieve().bodyToMono(List.class).block();
+//        if(ObjectUtils.isNotEmpty(apiKey)){
+//            return webClient.get().uri(uri).header(apiKey.getKeyName(), apiKey.getApiKey()).retrieve().bodyToMono(List.class).block();
+//        }
+//        return webClient.get().uri(builder.build()).retrieve().bodyToMono(List.class).block();
     }
+
+    public URI createURI(UriBuilder uriBuilder, List<String> pathVariable){
+        if(CollectionUtils.isNotEmpty(pathVariable)){
+            return uriBuilder.build(pathVariable.toArray(new String[0]));
+        }else{
+            return uriBuilder.build();
+        }
+    }
+
+    public WebClient.RequestHeadersSpec<?> craeteHeader(URI uri, ApiKey apiKey){
+        if(ObjectUtils.isNotEmpty(apiKey)){
+            return webClient.get().uri(uri).header(apiKey.getKeyName(), apiKey.getApiKey());
+        }else {
+            return webClient.get().uri(uri);
+        }
+    }
+
 
 //    @Override
 //    public String webClientPathTokenGet(WebClientDTO webClientDTO, ApiKey apiKey) {
