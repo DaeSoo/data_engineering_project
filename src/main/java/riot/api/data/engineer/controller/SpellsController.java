@@ -42,9 +42,7 @@ public class SpellsController {
     @GetMapping("/get")
     public ResponseEntity<ApiResult> getSpells() {
         try{
-            String apiName = "/ddragon/spells/get";
-
-            ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
+            ApiInfo apiInfo = apiInfoService.findOneByName(new Exception().getStackTrace()[0].getMethodName());
             Version version = versionService.findOneByCurrentVersion();
             KafkaInfo kafkaInfo = kafkaInfoService.findOneByApiInfoId(apiInfo.getApiInfoId());
 

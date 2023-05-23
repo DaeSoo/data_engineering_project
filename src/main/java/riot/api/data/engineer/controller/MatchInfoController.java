@@ -38,13 +38,10 @@ public class MatchInfoController {
     @GetMapping("detail")
     public ResponseEntity<ApiResult> getMatchDetail(){
 
-        String apiName = "/match/detail";
-
-        ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
+        ApiInfo apiInfo = apiInfoService.findOneByName(new Exception().getStackTrace()[0].getMethodName());
         List<ApiKey> apiKeyList = apiKeyService.findList();
         ResponseEntity<ApiResult> response = matchInfoService.apiCallBatch(apiInfo, apiKeyList);
         return response;
-
 
     }
 }

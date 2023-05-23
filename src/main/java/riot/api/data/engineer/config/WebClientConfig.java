@@ -46,7 +46,7 @@ public class WebClientConfig {
                 .filter(
                         ExchangeFilterFunction.ofRequestProcessor(
                                 clientRequest -> {
-                                    log.info(">>>>>>>>>> REQUEST <<<<<<<<<<");
+//                                    log.info(">>>>>>>>>> REQUEST <<<<<<<<<<");
                                     log.info("Request: {} {}", clientRequest.method(), clientRequest.url());
 //                                    clientRequest.headers().forEach(
 //                                            (name, values) -> values.forEach(value -> log.info("{} : {}", name, value))
@@ -58,7 +58,7 @@ public class WebClientConfig {
                 .filter(
                         ExchangeFilterFunction.ofResponseProcessor(
                                 clientResponse -> {
-                                    log.info(">>>>>>>>>> RESPONSE <<<<<<<<<<");
+//                                    log.info(">>>>>>>>>> RESPONSE <<<<<<<<<<");
                                     log.info("Status Code : " + clientResponse.statusCode());
                                     if(clientResponse.statusCode().is4xxClientError() || clientResponse.statusCode().is5xxServerError()){
                                         log.info("--- ERROR LOG ---");

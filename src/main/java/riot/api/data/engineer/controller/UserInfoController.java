@@ -28,8 +28,7 @@ public class UserInfoController {
 
     @GetMapping("/user/entries")
     public ResponseEntity<ApiResult> getUserEntries() throws InterruptedException {
-        String apiName = "/userinfo/entries";
-        List<ApiInfo> apiInfoList = apiInfoService.findByName(apiName);
+        List<ApiInfo> apiInfoList = apiInfoService.findByName(new Exception().getStackTrace()[0].getMethodName());
         List<ApiKey> apiKeyList = apiKeyService.findList();
 
         ResponseEntity<ApiResult> response = userInfoService.apiCallBatch(apiInfoList, apiKeyList);

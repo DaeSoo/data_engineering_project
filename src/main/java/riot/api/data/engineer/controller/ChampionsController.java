@@ -39,9 +39,7 @@ public class ChampionsController {
     @GetMapping("/get")
     public ResponseEntity<ApiResult> getChampions() {
         try{
-            String apiName = "/ddragon/champions/get";
-
-            ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
+            ApiInfo apiInfo = apiInfoService.findOneByName(new Exception().getStackTrace()[0].getMethodName());
             Version version = versionService.findOneByCurrentVersion();
             KafkaInfo kafkaInfo = kafkaInfoService.findOneByApiInfoId(apiInfo.getApiInfoId());
             List<String> pathVariable = new ArrayList<>();

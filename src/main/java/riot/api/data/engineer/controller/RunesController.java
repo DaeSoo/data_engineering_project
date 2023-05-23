@@ -43,8 +43,7 @@ public class RunesController {
     @GetMapping("/get")
     public ResponseEntity<ApiResult> getRunes() {
         try {
-            String apiName = "/ddragon/runes/get";
-            ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
+            ApiInfo apiInfo = apiInfoService.findOneByName(new Exception().getStackTrace()[0].getMethodName());
             Version version = versionService.findOneByCurrentVersion();
             KafkaInfo kafkaInfo = kafkaInfoService.findOneByApiInfoId(apiInfo.getApiInfoId());
 

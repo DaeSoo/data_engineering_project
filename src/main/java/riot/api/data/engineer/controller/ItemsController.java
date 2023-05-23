@@ -41,9 +41,7 @@ public class ItemsController {
     @GetMapping("get")
     public ResponseEntity<ApiResult> getItems() {
         try{
-            String apiName = "/ddragon/items/get";
-
-            ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
+            ApiInfo apiInfo = apiInfoService.findOneByName(new Exception().getStackTrace()[0].getMethodName());
             Version version = versionService.findOneByCurrentVersion();
             KafkaInfo kafkaInfo = kafkaInfoService.findOneByApiInfoId(apiInfo.getApiInfoId());
             List<String> pathVariable = new ArrayList<>();
