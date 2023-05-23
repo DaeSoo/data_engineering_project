@@ -4,13 +4,9 @@ package riot.api.data.engineer.serviceimpl;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.springframework.stereotype.Service;
-import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.champions.Champions;
 import riot.api.data.engineer.entity.champions.Data;
-import riot.api.data.engineer.entity.Version;
-import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.service.ChampionsService;
-import riot.api.data.engineer.service.WebclientCallService;
 import riot.api.data.engineer.utils.UtilManager;
 
 import java.util.ArrayList;
@@ -18,14 +14,9 @@ import java.util.List;
 
 @Service
 public class ChampionsServiceImpl implements ChampionsService {
-    private final WebclientCallService webclientCallService;
-
-    public ChampionsServiceImpl(WebclientCallService webclientCallService) {
-        this.webclientCallService = webclientCallService;
-    }
 
     @Override
-    public Champions setChampions(String response){
+    public Champions setChampions(String response) {
         JsonObject jsonObject = new UtilManager().StringToJsonObject(response);
 
         Champions champions = new Champions();
@@ -37,7 +28,8 @@ public class ChampionsServiceImpl implements ChampionsService {
         JsonObject championData = jsonObject.getAsJsonObject("data");
 
         List<Data> dataList = new ArrayList<>();
-        championData.keySet().forEach(key ->{
+
+        championData.keySet().forEach(key -> {
             String championName = key;
             JsonObject jsonObject2 = championData.getAsJsonObject(championName);
             Data data = gson.fromJson(jsonObject2, Data.class);
@@ -48,14 +40,4 @@ public class ChampionsServiceImpl implements ChampionsService {
         return champions;
     }
 
-    @Override
-    public String getChampionsInfo(ApiInfo apiInfo, Version version) {
-        List<String> pathVariable = new ArrayList<>();
-        pathVariable.add(version.getVersion());
-        WebClientDTO webClientDTO = WebClientDTO.builder().scheme(apiInfo.getApiScheme())
-                .host(apiInfo.getApiHost())
-                .path(apiInfo.getApiUrl())
-                .pathVariable(pathVariable).build();
-        return webclientCallService.getWebClientToString(webClientDTO, null);
-    }
 }

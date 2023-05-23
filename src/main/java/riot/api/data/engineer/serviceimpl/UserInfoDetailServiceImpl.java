@@ -5,10 +5,15 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import riot.api.data.engineer.apiresult.ApiResult;
 import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.UserInfo;
 import riot.api.data.engineer.entity.UserInfoDetail;
+import riot.api.data.engineer.entity.WebClientCaller;
 import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.entity.api.ApiKey;
 import riot.api.data.engineer.repository.UserInfoDetailQueryRepository;
@@ -17,7 +22,6 @@ import riot.api.data.engineer.service.ApiInfoService;
 import riot.api.data.engineer.service.ApiKeyService;
 import riot.api.data.engineer.service.UserInfoDetailService;
 import riot.api.data.engineer.service.UserInfoService;
-import riot.api.data.engineer.service.WebclientCallService;
 
 
 import java.util.ArrayList;
@@ -32,13 +36,10 @@ import java.util.concurrent.Executors;
 public class UserInfoDetailServiceImpl implements UserInfoDetailService {
     private final UserInfoDetailRepository userInfoDetailRepository ;
     private final UserInfoService userInfoService ;
-    private final WebclientCallService webclientCallService;
     private final ApiKeyService apiKeyService;
     private final ApiInfoService apiInfoService;
     private final UserInfoDetailQueryRepository userInfoDetailQueryRepository;
-
-    private String pacakgeName = this.getClass().getName();
-
+    private final WebClient webClient;
 
     @Override
     public UserInfoDetail userInfoDetailSave(UserInfoDetail userInfoDetail) {
@@ -61,30 +62,32 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
         }
     }
 
-    @Override
-    public void createTestMethod(String packageName, String methodName) {
-
-    }
-
 
     /**
      * @param apiKey ApiKey Entity
      * @param apiName ApiInfo apiName(method명)
      */
     @Override
-    public Boolean userInfoDetailApiRequest(ApiKey apiKey, String apiName) {
-        boolean let = false;
+    public void userInfoDetailApiRequest(ApiKey apiKey, String apiName) {
         try{
             List<UserInfo> userInfoList = userInfoService.getUserInfoList(apiKey.getApiKeyId(), "N");
             ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
             for (UserInfo userInfo : userInfoList) {
                 List<String> pathVariable = new ArrayList<>();
                 pathVariable.add(userInfo.getSummonerId());
-                WebClientDTO webClientDTO = WebClientDTO.builder().scheme(apiInfo.getApiScheme())
+                WebClientDTO webClientDTO = WebClientDTO.builder()
+                        .scheme(apiInfo.getApiScheme())
                         .host(apiInfo.getApiHost())
                         .path(apiInfo.getApiUrl())
                         .pathVariable(pathVariable).build();
-                String response = webclientCallService.getWebClientToString(webClientDTO, apiKey);
+
+                WebClientCaller webClientCaller = WebClientCaller.builder()
+                        .webclient(webClient)
+                        .webClientDTO(webClientDTO)
+                        .build();
+
+                String response = webClientCaller.getWebClientToString(apiKey);
+
                 userInfoDetailSave(jsonToEntity(response, apiKey.getApiKeyId()));
                 /*
                  * UserInfoDetail Save가 됬을 경우
@@ -102,15 +105,13 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
                     log.info("Exception : {}", e.getMessage());
                 }
             }
-            let = true;
         }catch (Exception e){
             log.error(" === ERROR === ");
             log.error(e.getMessage());
         }
-        return let;
     }
     @Override
-    public int createThread(String method){
+    public ResponseEntity<ApiResult> createThread(String method){
         List<ApiKey> apiKeyList = apiKeyService.findList();
         List<Callable<Integer>> tasks = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(apiKeyList.size());
@@ -128,13 +129,9 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
         }
         catch (Exception e){
             executorService.shutdownNow();
-            return -1;
+            return new ResponseEntity(new ApiResult(500, e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return 2;
-    }
-
-    public void createSubmit(ExecutorService executorService, ApiKey apiKey, String apiName){
-        executorService.submit(() -> userInfoDetailApiRequest(apiKey, apiName));
+        return new ResponseEntity(new ApiResult(200, "success", null), HttpStatus.OK);
     }
 
 

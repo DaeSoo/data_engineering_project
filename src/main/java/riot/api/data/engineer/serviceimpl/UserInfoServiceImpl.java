@@ -4,24 +4,27 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.reactive.function.client.WebClient;
+import riot.api.data.engineer.apiresult.ApiResult;
 import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.UserInfo;
+import riot.api.data.engineer.entity.WebClientCaller;
 import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.entity.api.ApiKey;
 import riot.api.data.engineer.repository.UserInfoQueryRepository;
 import riot.api.data.engineer.repository.UserInfoRepository;
 import riot.api.data.engineer.service.UserInfoService;
-import riot.api.data.engineer.service.WebclientCallService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -29,15 +32,12 @@ import java.util.concurrent.Executors;
 @RequiredArgsConstructor
 @Slf4j
 public class UserInfoServiceImpl implements UserInfoService {
-    private final Executor executor;
-    private final ExecutorService executorService;
-    private final WebclientCallService webclientCallService;
+    private final WebClient webClient;
     private final UserInfoRepository userInfoRepository;
     private final UserInfoQueryRepository userInfoQueryRepository;
 
-
     @Override
-    public int apiCallBatch(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList) {
+    public ResponseEntity<ApiResult> apiCallBatch(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList) {
         int batchSize = apiKeyList.size();
         List<Callable<Integer>> tasks = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(batchSize);
@@ -48,7 +48,7 @@ public class UserInfoServiceImpl implements UserInfoService {
                 int finalPage = page;
                 Callable<Integer> task = () -> {
                     apiCallRepeat(apiInfo, apiKey, finalPage,batchSize);
-                    return 1;
+                    return 200;
                 };
                 page++;
                 tasks.add(task);
@@ -60,10 +60,12 @@ public class UserInfoServiceImpl implements UserInfoService {
         }
         catch (Exception e){
             executorService.shutdownNow();
-            return -1;
+            ApiResult apiResult = new ApiResult(500,e.getMessage(),null);
+            return new ResponseEntity<>(apiResult, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return 2;
+        ApiResult apiResult = new ApiResult(200,"success",null);
+        return new ResponseEntity<>(apiResult,HttpStatus.OK);
     }
 
     @Transactional
@@ -74,9 +76,19 @@ public class UserInfoServiceImpl implements UserInfoService {
             while(true){
                 Map<String,String> paging = new HashMap<>();
                 paging.put("page",String.valueOf(pageSum));
-                WebClientDTO webClientDTO = WebClientDTO.builder().scheme(apiInfo.getApiScheme()).host(apiInfo.getApiHost()).path(apiInfo.getApiUrl()).paging(paging).build();
+                WebClientDTO webClientDTO = WebClientDTO.builder()
+                        .scheme(apiInfo.getApiScheme())
+                        .host(apiInfo.getApiHost())
+                        .path(apiInfo.getApiUrl())
+                        .paging(paging)
+                        .build();
 
-                String response = webclientCallService.getWebClientToString(webClientDTO,apiKey);
+                WebClientCaller webClientCaller = WebClientCaller.builder()
+                        .webClientDTO(webClientDTO)
+                        .webclient(webClient)
+                        .build();
+
+                String response = webClientCaller.getWebClientToString(apiKey);
                 List<UserInfo> userInfoList = gson.fromJson(response, new TypeToken<List<UserInfo>>(){}.getType());
 
                 if(CollectionUtils.isEmpty(userInfoList)){
@@ -86,7 +98,6 @@ public class UserInfoServiceImpl implements UserInfoService {
                     for (UserInfo userInfo : userInfoList) {
                         userInfo.setUpdateYn("N");
                         userInfo.setApiKeyId(apiKey.getApiKeyId());
-
                         userInfoRepository.save(userInfo);
                     }
                     pageSum += batchSize;
@@ -115,8 +126,15 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Override
-    public void removeAll(List<UserInfo> userInfoList) {
-        userInfoRepository.deleteAll(userInfoList);
+    @Transactional
+    public ApiResult removeAll(List<UserInfo> userInfoList) {
+        try{
+            userInfoRepository.deleteAll(userInfoList);
+            return new ApiResult(200,"success",userInfoList.size());
+        }catch (Exception e){
+            return new ApiResult(500,e.getMessage(),userInfoList.size());
+        }
+
     }
 
     @Override
