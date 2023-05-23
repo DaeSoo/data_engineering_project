@@ -23,7 +23,7 @@ public class KafkaConsumerConfig {
     private String bootstrapServers;
 
     @Value("${spring.kafka.consumer.group-id}")
-    private String consumer_groupid;
+    private String consumerGroupId;
 
     @Bean
     public Map<String, Object> consumerConfigs() {
@@ -31,7 +31,7 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, consumer_groupid);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, consumerGroupId);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         return props;
     }

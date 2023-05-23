@@ -70,10 +70,10 @@ public class ChampionsController {
                 String json = gson.toJson(data);
                 myProducer.sendMessage(kafkaInfo, json);
             }
-            return new ResponseEntity(new ApiResult(200,"success",champions), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResult(200,"success",champions), HttpStatus.OK);
         }
         catch (Exception e){
-            return new ResponseEntity(new ApiResult(500,e.getMessage(),null), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResult(500,e.getMessage(),null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

@@ -18,8 +18,8 @@ public class KafkaAdminConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    private static final int partitionCount = 5;
-    private static final int replicaCount = 3;
+    private static final int PARTITION_COUNT = 5;
+    private static final int REPLICA_COUNT = 3;
 
     @Bean
     public KafkaAdmin admin() {
@@ -31,8 +31,8 @@ public class KafkaAdminConfig {
     @Bean
     public NewTopic setMatchTopic() {
         return TopicBuilder.name("matchs")
-                .partitions(partitionCount)
-                .replicas(replicaCount)
+                .partitions(PARTITION_COUNT)
+                .replicas(REPLICA_COUNT)
                 .compact()
                 .build();
     }
@@ -40,8 +40,8 @@ public class KafkaAdminConfig {
     @Bean
     public NewTopic setRunes() {
         return TopicBuilder.name("runes")
-                .partitions(partitionCount)
-                .replicas(replicaCount)
+                .partitions(PARTITION_COUNT)
+                .replicas(REPLICA_COUNT)
                 .compact()
                 .build();
     }
@@ -49,8 +49,8 @@ public class KafkaAdminConfig {
     @Bean
     public NewTopic setChampions() {
         return TopicBuilder.name("champions")
-                .partitions(partitionCount)
-                .replicas(replicaCount)
+                .partitions(PARTITION_COUNT)
+                .replicas(REPLICA_COUNT)
                 .compact()
                 .build();
     }
@@ -58,8 +58,8 @@ public class KafkaAdminConfig {
     @Bean
     public NewTopic setItems() {
         return TopicBuilder.name("items")
-                .partitions(partitionCount)
-                .replicas(replicaCount)
+                .partitions(PARTITION_COUNT)
+                .replicas(REPLICA_COUNT)
                 .compact()
                 .build();
 
@@ -68,8 +68,8 @@ public class KafkaAdminConfig {
     @Bean
     public NewTopic setSpells() {
         return TopicBuilder.name("spells")
-                .partitions(partitionCount)
-                .replicas(replicaCount)
+                .partitions(PARTITION_COUNT)
+                .replicas(REPLICA_COUNT)
                 .compact()
                 .build();
     }

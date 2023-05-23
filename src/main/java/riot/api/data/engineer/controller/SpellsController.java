@@ -74,9 +74,9 @@ public class SpellsController {
                 myProducer.sendMessage(kafkaInfo, json);
             }
 
-            return new ResponseEntity(new ApiResult(200, "success", spells), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResult(200, "success", spells), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity(new ApiResult(500, e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResult(500, e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

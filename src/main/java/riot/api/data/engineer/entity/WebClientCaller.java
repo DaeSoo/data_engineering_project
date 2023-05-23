@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @Builder
 public class WebClientCaller {
-    private static final String page = "page";
+    private static final String PAGE = "page";
 
     private WebClient webclient;
     private WebClientDTO webClientDTO;
@@ -72,7 +72,7 @@ public class WebClientCaller {
             }
         }
         if(MapUtils.isNotEmpty(webClientDTO.getPaging())){
-            uriBuilder.queryParamIfPresent(page, Optional.ofNullable(webClientDTO.getQueryParam().get(page))).build();
+            uriBuilder.queryParamIfPresent(PAGE, Optional.ofNullable(webClientDTO.getQueryParam().get(PAGE))).build();
         }
         return uriBuilder;
     }
