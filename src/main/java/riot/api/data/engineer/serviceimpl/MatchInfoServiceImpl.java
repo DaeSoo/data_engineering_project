@@ -264,6 +264,8 @@ public class MatchInfoServiceImpl implements MatchInfoService {
     }
 
     public String setEndDate(String endDate) {
-        return String.valueOf(LocalDateTime.of(LocalDate.parse(endDate), LocalTime.of(23, 59, 59)).atZone(ZoneId.of("Asia/Seoul")).toEpochSecond());
+        return String.valueOf(
+                LocalDateTime.of(LocalDate.parse(endDate),
+                LocalTime.of(23, 59, 59)).atZone(ZoneId.of("Asia/Seoul")).toEpochSecond() + 3600L);
     }
 }
