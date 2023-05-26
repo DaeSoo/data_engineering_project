@@ -1,6 +1,5 @@
 package riot.api.data.engineer.controller;
 
-import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -10,19 +9,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 import riot.api.data.engineer.apiresult.ApiResult;
-import riot.api.data.engineer.dto.WebClientDTO;
 import riot.api.data.engineer.entity.KafkaInfo;
-import riot.api.data.engineer.entity.MyProducer;
 import riot.api.data.engineer.entity.Version;
-import riot.api.data.engineer.entity.WebClientCaller;
 import riot.api.data.engineer.entity.api.ApiInfo;
+import riot.api.data.engineer.entity.runes.Rune;
 import riot.api.data.engineer.entity.runes.RuneList;
 import riot.api.data.engineer.service.ApiInfoService;
 import riot.api.data.engineer.service.KafkaInfoService;
 import riot.api.data.engineer.service.RuneService;
 import riot.api.data.engineer.service.VersionService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -35,7 +31,6 @@ public class RunesController {
 
     private final VersionService versionService;
     private final KafkaInfoService kafkaInfoService;
-    private final MyProducer myProducer;
     private final RuneService runeService;
 
     private final WebClient webClient;
@@ -43,35 +38,22 @@ public class RunesController {
     @GetMapping("/get")
     public ResponseEntity<ApiResult> getRunes() {
         try {
+            /** API 정보 조회 **/
             ApiInfo apiInfo = apiInfoService.findOneByName(new Exception().getStackTrace()[0].getMethodName());
+            /** 버전 조회 **/
             Version version = versionService.findOneByCurrentVersion();
+            /** KAFKA 정보 조회 **/
             KafkaInfo kafkaInfo = kafkaInfoService.findOneByApiInfoId(apiInfo.getApiInfoId());
-
-            List<String> pathVariable = new ArrayList<>();
-            pathVariable.add(version.getVersion());
-
-            WebClientDTO webClientDTO = WebClientDTO.builder()
-                    .scheme(apiInfo.getApiScheme())
-                    .host(apiInfo.getApiHost())
-                    .path(apiInfo.getApiUrl())
-                    .pathVariable(pathVariable)
-                    .build();
-
-            WebClientCaller webClientCaller = WebClientCaller.builder()
-                    .webClientDTO(webClientDTO)
-                    .webclient(webClient)
-                    .build();
-
-            String response = webClientCaller.getWebClientToString();
-
+            /** pathVariable 세팅 **/
+            List<String> pathVariable = runeService.setPathVariableVersion(version);
+            /** api RESPONSE **/
+            String response = runeService.apiCall(webClient, apiInfo, pathVariable);
+            /** String to POJO **/
             RuneList runeList = runeService.setRuneList(response);
-            Gson gson = new Gson();
-            runeList.getRuneList().forEach(rune -> {
-                rune.setVersion(version.getVersion().replaceAll("\"", ""));
-                String json = gson.toJson(rune);
-                myProducer.sendMessage(kafkaInfo, json);
-            });
-            return new ResponseEntity<>(new ApiResult(200, "success", runeList), HttpStatus.OK);
+            /** 카프카 메세지 전송 **/
+            List<Rune> runes = runeService.sendKafkaMessage(kafkaInfo, runeList, version);
+
+            return new ResponseEntity<>(new ApiResult(200, "success", runes), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new ApiResult(500, e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
