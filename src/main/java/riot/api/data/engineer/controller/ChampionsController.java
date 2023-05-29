@@ -29,7 +29,6 @@ public class ChampionsController {
     private final VersionService versionService;
     private final KafkaInfoService kafkaInfoService;
     private final WebClient webClient;
-    private final ApiErrorLogsService apiErrorLogsService;
 
     @GetMapping("/get")
     public ResponseEntity<ApiResult> getChampions() {

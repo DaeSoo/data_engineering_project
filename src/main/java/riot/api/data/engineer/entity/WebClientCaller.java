@@ -40,12 +40,6 @@ public class WebClientCaller {
         return createHeader(uri, apiKey).retrieve().bodyToMono(List.class).block();
     }
 
-    public List getWebClientToList() {
-        UriBuilder builder = createMapToParam();
-        URI uri = createURI(builder, webClientDTO.getPathVariable());
-        return createHeader(uri).retrieve().bodyToMono(List.class).block();
-    }
-
     private URI createURI(UriBuilder uriBuilder, List<String> pathVariable){
         if(CollectionUtils.isNotEmpty(pathVariable)){
             return uriBuilder.build(pathVariable.toArray(new String[0]));

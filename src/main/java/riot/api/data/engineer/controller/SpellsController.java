@@ -31,7 +31,6 @@ public class SpellsController {
     private final ApiInfoService apiInfoService;
     private final VersionService versionService;
     private final KafkaInfoService kafkaInfoService;
-    private final MyProducer myProducer;
     private final SpellService spellService;
     private final WebClient webClient;
 

@@ -1,7 +1,6 @@
 package riot.api.data.engineer.entity.api;
 
 import lombok.Getter;
-
 import javax.persistence.*;
 
 @Entity

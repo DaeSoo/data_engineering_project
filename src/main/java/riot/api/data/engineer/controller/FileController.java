@@ -20,13 +20,13 @@ public class FileController {
 
     @PostMapping(value = "/upload", produces = MimeTypeUtils.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Mono<UploadResponse> upload(
-            @RequestPart(value = "files", required = true) Mono<FilePart> files) {
+            @RequestPart(value = "files") Mono<FilePart> files) {
         return minioAdapter.uploadFile(files);
     }
 
     @PostMapping(path = "/stream", produces = MimeTypeUtils.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Mono<UploadResponse> uploadStream(
-            @RequestPart(value = "files", required = true) FilePart files, @RequestParam(value = "ttl", required = false) Integer ttl) {
+            @RequestPart(value = "files") FilePart files, @RequestParam(value = "ttl", required = false) Integer ttl) {
         return minioAdapter.putObject(files);
 
     }

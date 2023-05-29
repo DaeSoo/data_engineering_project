@@ -32,7 +32,6 @@ public class RunesController {
     private final VersionService versionService;
     private final KafkaInfoService kafkaInfoService;
     private final RuneService runeService;
-
     private final WebClient webClient;
 
     @GetMapping("/get")
