@@ -12,15 +12,15 @@ public interface UserInfoDetailService {
 
     UserInfoDetail userInfoDetailSave(UserInfoDetail userInfoDetail);
 
-    void userInfoDetailApiRequest(ApiKey apiKey, String apiName);
+    void userInfoDetailApiCall(ApiKey apiKey, String apiName);
 
-    ResponseEntity<ApiResult> createThread(String method);
+    ResponseEntity<ApiResult> createUserInfoDetailTasks(String method);
 
     UserInfoDetail jsonToEntity(String response, Long apiKeyId);
 
-    List<UserInfoDetail> userInfoDeatilList();
+    List<UserInfoDetail> findUserInfoDetailList();
 
-    List<UserInfoDetail> userInfoDeatilList(Long apiKey);
+    List<UserInfoDetail> findUserInfoDetailListByApiKey(Long apiKey);
 
 
 }

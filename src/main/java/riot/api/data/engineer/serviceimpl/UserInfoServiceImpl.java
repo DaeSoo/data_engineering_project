@@ -37,7 +37,7 @@ public class UserInfoServiceImpl implements UserInfoService {
     private final UserInfoQueryRepository userInfoQueryRepository;
 
     @Override
-    public ResponseEntity<ApiResult> apiCallBatch(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList) {
+    public ResponseEntity<ApiResult> createUserEntriesTasks(List<ApiInfo> apiInfoList, List<ApiKey> apiKeyList) {
         int batchSize = apiKeyList.size();
         List<Callable<Integer>> tasks = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(batchSize);
@@ -47,7 +47,7 @@ public class UserInfoServiceImpl implements UserInfoService {
             for (ApiKey apiKey : apiKeyList) {
                 int finalPage = page;
                 Callable<Integer> task = () -> {
-                    apiCallRepeat(apiInfo, apiKey, finalPage,batchSize);
+                    userEntriesApiCall(apiInfo, apiKey, finalPage,batchSize);
                     return 200;
                 };
                 page++;
@@ -66,26 +66,18 @@ public class UserInfoServiceImpl implements UserInfoService {
         return new ResponseEntity<>(new ApiResult(200,"success",null),HttpStatus.OK);
     }
 
-    public void apiCallRepeat(ApiInfo apiInfo, ApiKey apiKey, int page,int batchSize){
+    public void userEntriesApiCall(ApiInfo apiInfo, ApiKey apiKey, int page, int batchSize){
         Gson gson = new Gson();
         int pageSum = page;
         try{
             while(true){
+                /*** API 호출 세팅 ***/
                 Map<String,String> paging = new HashMap<>();
                 paging.put("page",String.valueOf(pageSum));
-                WebClientDTO webClientDTO = WebClientDTO.builder()
-                        .scheme(apiInfo.getApiScheme())
-                        .host(apiInfo.getApiHost())
-                        .path(apiInfo.getApiUrl())
-                        .paging(paging)
-                        .build();
-
-                WebClientCaller webClientCaller = WebClientCaller.builder()
-                        .webClientDTO(webClientDTO)
-                        .webclient(webClient)
-                        .build();
-
+                WebClientCaller webClientCaller = buildWebClientCaller(paging,apiInfo);
+                /*** API 호출 ***/
                 String response = webClientCaller.getWebClientToString(apiKey);
+                /*** String to userInfoList ***/
                 List<UserInfo> userInfoList = gson.fromJson(response, new TypeToken<List<UserInfo>>(){}.getType());
 
                 if(CollectionUtils.isEmpty(userInfoList)){
@@ -109,18 +101,18 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Override
-    public List<UserInfo> getUserInfoList(Long apiKey, String updateYn) {
+    public List<UserInfo> findUserInfoListUpdateYnIsN(Long apiKey, String updateYn) {
         return userInfoQueryRepository.findListByApiKeyId(apiKey, updateYn);
     }
 
     @Override
-    public List<UserInfo> getUserInfoListAll() {
+    public List<UserInfo> findUserInfoListAll() {
         return userInfoRepository.findAll();
     }
 
     @Override
     @Transactional
-    public ApiResult removeAll(List<UserInfo> userInfoList) {
+    public ApiResult deleteAll(List<UserInfo> userInfoList) {
         try{
             userInfoRepository.deleteAll(userInfoList);
             return new ApiResult(200,"success",userInfoList.size());
@@ -130,6 +122,20 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     }
 
+    private WebClientCaller buildWebClientCaller(Map<String, String> paging,ApiInfo apiInfo){
+
+        WebClientDTO webClientDTO = WebClientDTO.builder()
+                .scheme(apiInfo.getApiScheme())
+                .host(apiInfo.getApiHost())
+                .path(apiInfo.getApiUrl())
+                .paging(paging)
+                .build();
+
+        return WebClientCaller.builder()
+                .webClientDTO(webClientDTO)
+                .webclient(webClient)
+                .build();
+    }
     @Override
     public UserInfo save(UserInfo userInfo) {
         return userInfoRepository.save(userInfo);

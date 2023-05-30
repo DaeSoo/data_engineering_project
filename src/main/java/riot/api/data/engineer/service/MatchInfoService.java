@@ -12,12 +12,12 @@ public interface MatchInfoService {
 
     MatchInfo matchInfoSave(MatchInfo matchInfo);
 
-    void matchApiRequest(ApiKey apiKey, String apiName, String startDate, String endDate);
+    void matchListApiCall(ApiKey apiKey, String apiName, String startDate, String endDate);
 
-    ResponseEntity<ApiResult> createThread(String method, String startDate, String endDate);
+    ResponseEntity<ApiResult> createMatchInfoTasks(String method, String startDate, String endDate);
 
-    List<MatchInfo> getMatchInfoList();
+    List<MatchInfo> findMatchInfoList();
 
-    ResponseEntity<ApiResult> apiCallBatch(ApiInfo apiInfo, List<ApiKey> apiKeyList);
+    ResponseEntity<ApiResult> createMatchInfoDetailTasks(ApiInfo apiInfo, List<ApiKey> apiKeyList);
 
 }

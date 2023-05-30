@@ -31,20 +31,20 @@ public class UserInfoController {
         List<ApiInfo> apiInfoList = apiInfoService.findByName(new Exception().getStackTrace()[0].getMethodName());
         List<ApiKey> apiKeyList = apiKeyService.findList();
 
-        ResponseEntity<ApiResult> response = userInfoService.apiCallBatch(apiInfoList, apiKeyList);
+        ResponseEntity<ApiResult> response = userInfoService.createUserEntriesTasks(apiInfoList, apiKeyList);
 
         return response;
 
     }
 
     @DeleteMapping("/user/entries")
-    public ResponseEntity<ApiResult> userEntriesRemove() {
+    public ResponseEntity<ApiResult> userEntriesDelete() {
         try{
-            List<UserInfo> userInfoList = userInfoService.getUserInfoListAll();
+            List<UserInfo> userInfoList = userInfoService.findUserInfoListAll();
             if(CollectionUtils.isEmpty(userInfoList)){
                 return new ResponseEntity<>(new ApiResult(404,"List is Empty",null), HttpStatus.BAD_REQUEST);
             }
-            ApiResult apiResult = userInfoService.removeAll(userInfoList);
+            ApiResult apiResult = userInfoService.deleteAll(userInfoList);
             return new ResponseEntity<>(apiResult,HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(new ApiResult(500,e.getMessage(),null), HttpStatus.INTERNAL_SERVER_ERROR);

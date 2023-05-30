@@ -31,7 +31,7 @@ public class MatchInfoController {
 
     @PostMapping("save")
     public ResponseEntity<ApiResult> getMatchList(@Valid @RequestBody MatchInfoDto matchInfoDto) {
-        ResponseEntity<ApiResult> response = matchInfoService.createThread(new Exception().getStackTrace()[0].getMethodName(), matchInfoDto.getStartTime(), matchInfoDto.getEndTime());
+        ResponseEntity<ApiResult> response = matchInfoService.createMatchInfoTasks(new Exception().getStackTrace()[0].getMethodName(), matchInfoDto.getStartTime(), matchInfoDto.getEndTime());
         return response;
     }
 
@@ -40,7 +40,8 @@ public class MatchInfoController {
 
         ApiInfo apiInfo = apiInfoService.findOneByName(new Exception().getStackTrace()[0].getMethodName());
         List<ApiKey> apiKeyList = apiKeyService.findList();
-        ResponseEntity<ApiResult> response = matchInfoService.apiCallBatch(apiInfo, apiKeyList);
+
+        ResponseEntity<ApiResult> response = matchInfoService.createMatchInfoDetailTasks(apiInfo, apiKeyList);
         return response;
 
     }

@@ -20,7 +20,7 @@ public class MatchInfoQueryRepository {
                 .fetch();
     }
 
-    public List<MatchInfo> findMatchInfoByCollectCompleteYn() {
+    public List<MatchInfo> findMatchInfoByCollectCompleteYnIsFalse() {
         return queryFactory.selectFrom(matchInfo)
                 .where(matchInfo.collectCompleteYn.eq(false))
                 .fetch();
