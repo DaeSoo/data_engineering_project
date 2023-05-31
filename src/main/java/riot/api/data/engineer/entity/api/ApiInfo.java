@@ -2,7 +2,10 @@ package riot.api.data.engineer.entity.api;
 
 
 import lombok.Getter;
+import riot.api.data.engineer.entity.KafkaInfo;
+
 import javax.persistence.*;
+import java.util.List;
 
 @Getter
 @Entity(name = "api_info")
@@ -39,5 +42,10 @@ public class ApiInfo {
     @Column(name = "content_type")
     private String contentType;
 
+    @OneToOne
+    @JoinColumn(name = "api_info_id")
+    private KafkaInfo kafkaInfo;
 
+    @OneToMany(fetch = FetchType.EAGER, cascade={CascadeType.ALL}, mappedBy = "apiInfo", orphanRemoval=true)
+    private List<ApiParams> apiParams;
 }

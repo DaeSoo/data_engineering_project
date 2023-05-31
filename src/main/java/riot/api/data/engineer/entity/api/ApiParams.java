@@ -15,7 +15,7 @@ public class ApiParams {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     Long apiParamsId;
     /** ApiInfo 테이블 **/
-    @Column(name = "api_info_id")
+    @Column(name = "api_info_id",insertable = false,updatable = false)
     Long apiInfoId;
     /** 파라미터 명 **/
     @Column(name = "name")
@@ -41,4 +41,8 @@ public class ApiParams {
     /** 날짜 파라미터 여부 **/
     @Column(name = "date_param_required")
     Boolean dateParamRequired;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "api_info_id")
+    ApiInfo apiInfo;
 }

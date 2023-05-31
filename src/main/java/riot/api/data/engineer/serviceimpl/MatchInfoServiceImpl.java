@@ -83,8 +83,7 @@ public class MatchInfoServiceImpl implements MatchInfoService {
         try {
             List<UserInfoDetail> userInfoDetailList = userInfoDetailService.findUserInfoDetailListByApiKey(apiKey.getApiKeyId());
             ApiInfo apiInfo = apiInfoService.findOneByName(apiName);
-            List<ApiParams> apiParamsList = apiParamsService.getApiParamsList(apiInfo.getApiInfoId());
-            Map<String, String> queryParams = setParams(apiParamsList, startDate, endDate);
+            Map<String, String> queryParams = setParams(apiInfo.getApiParams(), startDate, endDate);
 
             for (UserInfoDetail userInfoDetail : userInfoDetailList) {
 

@@ -1,10 +1,8 @@
 package riot.api.data.engineer.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import riot.api.data.engineer.entity.api.ApiKey;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,7 +20,6 @@ public class MatchInfo extends BaseEntity{
 
     @Column(name = "api_key_id")
     private Long apiKeyId;
-
 
     @Column(name = "collect_complete_yn")
     private Boolean collectCompleteYn;
