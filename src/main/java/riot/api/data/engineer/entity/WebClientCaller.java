@@ -60,13 +60,16 @@ public class WebClientCaller {
 
         UriBuilder uriBuilder = getUriBuilder();
 
-        if(MapUtils.isNotEmpty(webClientDTO.getQueryParam())){
-            for(Map.Entry<String, String> entry : webClientDTO.getQueryParam().entrySet()){
+        Optional<Map<String,String>> queryParams = Optional.ofNullable(webClientDTO.getQueryParam());
+        Optional<Map<String,String>> paging = Optional.ofNullable(webClientDTO.getPaging());
+
+        if(queryParams.isPresent()){
+            for(Map.Entry<String, String> entry : queryParams.get().entrySet()){
                 uriBuilder.queryParam(entry.getKey(), entry.getValue());
             }
         }
-        if(MapUtils.isNotEmpty(webClientDTO.getPaging())){
-            uriBuilder.queryParamIfPresent(PAGE, Optional.ofNullable(webClientDTO.getQueryParam().get(PAGE))).build();
+        if(paging.isPresent()){
+            uriBuilder.queryParamIfPresent(PAGE, Optional.ofNullable(paging.get().get(PAGE))).build();
         }
         return uriBuilder;
     }
