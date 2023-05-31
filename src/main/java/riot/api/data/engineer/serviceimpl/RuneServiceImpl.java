@@ -37,12 +37,10 @@ public class RuneServiceImpl implements RuneService {
         jsonArray.forEach(jsonElement -> {
             JsonObject jsonObject = jsonElement.getAsJsonObject();
             Rune rune = gson.fromJson(jsonObject, Rune.class);
-            rune.getSlots().forEach(slot -> {
-                slot.getRunes().forEach(runeDetail -> {
-                    runeDetail.setShortDesc(runeDetail.getShortDesc().replaceAll("<[^>]+>",""));
-                    runeDetail.setLongDesc(runeDetail.getLongDesc().replaceAll("<[^>]+>",""));
-                });
-            });
+            rune.getSlots().forEach(slot -> slot.getRunes().forEach(runeDetail -> {
+                runeDetail.setShortDesc(runeDetail.getShortDesc().replaceAll("<[^>]+>",""));
+                runeDetail.setLongDesc(runeDetail.getLongDesc().replaceAll("<[^>]+>",""));
+            }));
             runes.add(rune);
         });
         runeList.setRuneList(runes);

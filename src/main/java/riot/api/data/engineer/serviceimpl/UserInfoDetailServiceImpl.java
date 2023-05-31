@@ -92,10 +92,14 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
                 Thread.sleep(1200);
 
             }
-        }catch (Exception e){
+        }catch (InterruptedException ie){
+            log.error(" === ERROR === ");
+            log.error(ie.getMessage());
+            Thread.currentThread().interrupt();
+        }
+        catch (Exception e){
             log.error(" === ERROR === ");
             log.error(e.getMessage());
-
         }
     }
 

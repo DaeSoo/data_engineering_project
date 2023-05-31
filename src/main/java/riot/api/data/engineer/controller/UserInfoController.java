@@ -31,9 +31,7 @@ public class UserInfoController {
         List<ApiInfo> apiInfoList = apiInfoService.findByName(new Exception().getStackTrace()[0].getMethodName());
         List<ApiKey> apiKeyList = apiKeyService.findList();
 
-        ResponseEntity<ApiResult> response = userInfoService.createUserEntriesTasks(apiInfoList, apiKeyList);
-
-        return response;
+        return userInfoService.createUserEntriesTasks(apiInfoList, apiKeyList);
 
     }
 

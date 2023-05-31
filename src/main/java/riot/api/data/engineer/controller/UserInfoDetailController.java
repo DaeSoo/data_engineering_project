@@ -17,8 +17,7 @@ public class UserInfoDetailController {
 
     @GetMapping("save")
     public ResponseEntity<ApiResult> getUserInfoDetail(){
-        ResponseEntity<ApiResult> response = userInfoDetailService.createUserInfoDetailTasks(new Exception().getStackTrace()[0].getMethodName());
-        return response;
+        return userInfoDetailService.createUserInfoDetailTasks(new Exception().getStackTrace()[0].getMethodName());
     }
 
 }
