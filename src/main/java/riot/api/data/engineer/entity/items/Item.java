@@ -8,6 +8,9 @@ import java.util.List;
 @Getter
 @Setter
 public class Item {
+
+    @SerializedName("item_id")
+    String itemId;
     String name;
     String description;
     String colloq;

@@ -38,9 +38,9 @@ public class ItemServiceImpl implements ItemService {
         List<Item> itemList = new ArrayList<>();
 
         itemsData.keySet().forEach(key -> {
-            String spellName = key;
-            JsonObject itemJson = itemsData.getAsJsonObject(spellName);
+            JsonObject itemJson = itemsData.getAsJsonObject(key);
             Item item = gson.fromJson(itemJson,Item.class);
+            item.setItemId(key);
             itemList.add(item);
         });
         items.setItemList(itemList);
