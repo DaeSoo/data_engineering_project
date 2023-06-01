@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import riot.api.data.engineer.apiresult.ApiResult;
@@ -28,10 +29,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,7 +44,6 @@ public class MatchInfoServiceImpl implements MatchInfoService {
     private final ApiKeyService apiKeyService;
     private final KafkaInfoService kafkaInfoService;
     private final MyProducer myProducer;
-    private final ApiParamsService apiParamsService;
     private final MatchInfoQueryRepository matchInfoQueryRepository;
     private final WebClient webClient;
 
@@ -141,6 +138,32 @@ public class MatchInfoServiceImpl implements MatchInfoService {
             log.error("===== MatchInfoDetailTasks End =====");
             return new ResponseEntity<>(new ApiResult(500, e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Override
+    @Transactional
+    public ApiResult deleteAllByCollectCompleteYn(String collectCompleteYn) {
+        try{
+            Optional<String> optionalCollectCompleteYn = Optional.ofNullable(collectCompleteYn);
+            if(optionalCollectCompleteYn.isPresent()){
+                if(optionalCollectCompleteYn.get().equals("true")){
+                    matchInfoRepository.deleteMatchInfosByCollectCompleteYn(true);
+                    return new ApiResult(200,"success",null);
+                } else if (optionalCollectCompleteYn.get().equals("false")) {
+                    matchInfoRepository.deleteMatchInfosByCollectCompleteYn(false);
+                    return new ApiResult(200,"success",null);
+                } else {
+                    return new ApiResult(400,"파라미터 값이 올바르지 않습니다. (true/false만 허용)","입력된 collectCompleteYn : " + collectCompleteYn);
+                }
+            }
+            else {
+                matchInfoRepository.deleteAll();
+                return new ApiResult(200,"success",null);
+            }
+        }catch (Exception e){
+            return new ApiResult(500,e.getMessage(),null);
+        }
+
     }
 
     protected void matchDetailApiCall(ApiInfo apiInfo, ApiKey apiKey, List<MatchInfo> matchInfos, KafkaInfo kafkaInfo) {

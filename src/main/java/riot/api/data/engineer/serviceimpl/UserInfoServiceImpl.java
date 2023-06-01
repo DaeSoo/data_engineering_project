@@ -115,7 +115,7 @@ public class UserInfoServiceImpl implements UserInfoService {
                     return new ApiResult(200,"success",null);
                 }
                 else {
-                    return new ApiResult(400,"파라미터 값이 올바르지 않습니다. (Y/N만 허용)","입력 값 updateYn : " + updateYn);
+                    return new ApiResult(400,"파라미터 값이 올바르지 않습니다. (Y/N만 허용)","입력된 updateYn : " + updateYn);
                 }
             }
             else {

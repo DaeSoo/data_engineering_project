@@ -20,4 +20,6 @@ public interface MatchInfoService {
 
     ResponseEntity<ApiResult> createMatchInfoDetailTasks(ApiInfo apiInfo, List<ApiKey> apiKeyList);
 
+    ApiResult deleteAllByCollectCompleteYn(String collectCompleteYn);
+
 }

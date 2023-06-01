@@ -6,4 +6,5 @@ import riot.api.data.engineer.entity.MatchInfo;
 
 @Repository
 public interface MatchInfoRepository extends JpaRepository<MatchInfo, String> {
+    void deleteMatchInfosByCollectCompleteYn(boolean collectCompleteYn);
 }
