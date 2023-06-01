@@ -25,7 +25,7 @@ public class VersionController {
     private final VersionService versionService;
     private final WebClient webClient;
 
-    @GetMapping("/get")
+    @GetMapping("")
     public ResponseEntity<ApiResult> getVersion() {
         try {
             ApiInfo apiInfo = apiInfoService.findOneByName(new Exception().getStackTrace()[0].getMethodName());
@@ -43,7 +43,7 @@ public class VersionController {
         }
     }
 
-    @GetMapping("/current/get")
+    @GetMapping("/current")
     public ResponseEntity<ApiResult> getCurrentVersion() {
         try{
             Version version = versionService.findOneByCurrentVersion();

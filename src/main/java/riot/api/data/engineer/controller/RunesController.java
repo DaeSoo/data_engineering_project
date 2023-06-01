@@ -34,7 +34,7 @@ public class RunesController {
     private final RuneService runeService;
     private final WebClient webClient;
 
-    @GetMapping("/get")
+    @GetMapping("")
     public ResponseEntity<ApiResult> getRunes() {
         try {
             /** API 정보 조회 **/

@@ -15,7 +15,7 @@ import riot.api.data.engineer.service.UserInfoDetailService;
 public class UserInfoDetailController {
     private final UserInfoDetailService userInfoDetailService;
 
-    @GetMapping("save")
+    @GetMapping("")
     public ResponseEntity<ApiResult> getUserInfoDetail(){
         return userInfoDetailService.createUserInfoDetailTasks(new Exception().getStackTrace()[0].getMethodName());
     }

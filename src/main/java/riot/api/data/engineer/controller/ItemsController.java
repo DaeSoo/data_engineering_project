@@ -33,7 +33,7 @@ public class ItemsController {
     private final ItemService itemService;
     private final WebClient webClient;
 
-    @GetMapping("get")
+    @GetMapping("")
     public ResponseEntity<ApiResult> getItems() {
         try {
             /** API 정보 조회 **/

@@ -33,7 +33,7 @@ public class SpellsController {
     private final SpellService spellService;
     private final WebClient webClient;
 
-    @GetMapping("/get")
+    @GetMapping("")
     public ResponseEntity<ApiResult> getSpells() {
         try {
             /** API 정보 조회 **/

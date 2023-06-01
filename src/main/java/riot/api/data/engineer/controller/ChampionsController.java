@@ -30,7 +30,7 @@ public class ChampionsController {
     private final KafkaInfoService kafkaInfoService;
     private final WebClient webClient;
 
-    @GetMapping("/get")
+    @GetMapping("")
     public ResponseEntity<ApiResult> getChampions() {
 
 

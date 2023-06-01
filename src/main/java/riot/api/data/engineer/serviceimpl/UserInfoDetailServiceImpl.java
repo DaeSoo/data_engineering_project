@@ -43,6 +43,7 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
 
     @Override
     public ResponseEntity<ApiResult> createUserInfoDetailTasks(String method){
+        log.info("===== createUserInfoDetailTasks Start =====");
         List<ApiKey> apiKeyList = apiKeyService.findList();
         List<Callable<Integer>> tasks = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(apiKeyList.size());
@@ -61,8 +62,10 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
         catch (Exception e){
             executorService.shutdownNow();
             log.error(e.getMessage());
+            log.info("===== createUserInfoDetailTasks End =====");
             return new ResponseEntity(new ApiResult(500, e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        log.info("===== createUserInfoDetailTasks End =====");
         return new ResponseEntity(new ApiResult(200, "success", null), HttpStatus.OK);
     }
 

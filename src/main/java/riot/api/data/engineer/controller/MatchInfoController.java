@@ -29,7 +29,7 @@ public class MatchInfoController {
     private final ApiInfoService apiInfoService;
     private final ApiKeyService apiKeyService;
 
-    @PostMapping("save")
+    @PostMapping("list")
     public ResponseEntity<ApiResult> getMatchList(@Valid @RequestBody MatchInfoDto matchInfoDto) {
         return matchInfoService.createMatchInfoTasks(new Exception().getStackTrace()[0].getMethodName(), matchInfoDto.getStartTime(), matchInfoDto.getEndTime());
     }
