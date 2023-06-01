@@ -22,5 +22,7 @@ public interface UserInfoDetailService {
 
     List<UserInfoDetail> findUserInfoDetailListByApiKey(Long apiKey);
 
+    ApiResult deleteAll();
+
 
 }

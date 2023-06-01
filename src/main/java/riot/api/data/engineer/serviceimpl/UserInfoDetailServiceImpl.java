@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import riot.api.data.engineer.apiresult.ApiResult;
 import riot.api.data.engineer.dto.WebClientDTO;
@@ -150,5 +151,17 @@ public class UserInfoDetailServiceImpl implements UserInfoDetailService {
                 .webClientDTO(webClientDTO)
                 .webclient(webClient)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public ApiResult deleteAll() {
+        try{
+            userInfoDetailRepository.deleteAll();
+            return new ApiResult(200,"success",null);
+        }catch (Exception e){
+            return new ApiResult(500,e.getMessage(),null);
+        }
+
     }
 }

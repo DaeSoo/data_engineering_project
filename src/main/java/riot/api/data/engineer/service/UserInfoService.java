@@ -15,9 +15,7 @@ public interface UserInfoService {
 
     List<UserInfo> findUserInfoListUpdateYnIsN(Long apiKey, String updateYn);
 
-    List<UserInfo> findUserInfoListAll();
-
-    ApiResult deleteAll(List<UserInfo> userInfoList);
+    ApiResult deleteAllByUpdateYn(String updateYn);
 
     UserInfo save(UserInfo userInfo);
 }

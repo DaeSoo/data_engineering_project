@@ -5,5 +5,6 @@ import riot.api.data.engineer.entity.UserInfo;
 
 
 public interface UserInfoRepository extends JpaRepository<UserInfo,String> {
+    void deleteUserInfosByUpdateYn(String updateYn);
 
 }

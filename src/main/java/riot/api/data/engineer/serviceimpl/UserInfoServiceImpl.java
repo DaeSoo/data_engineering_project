@@ -20,10 +20,7 @@ import riot.api.data.engineer.repository.UserInfoQueryRepository;
 import riot.api.data.engineer.repository.UserInfoRepository;
 import riot.api.data.engineer.service.UserInfoService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -108,18 +105,26 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Override
-    public List<UserInfo> findUserInfoListAll() {
-        return userInfoRepository.findAll();
-    }
-
-    @Override
     @Transactional
-    public ApiResult deleteAll(List<UserInfo> userInfoList) {
+    public ApiResult deleteAllByUpdateYn(String updateYn) {
         try{
-            userInfoRepository.deleteAll(userInfoList);
-            return new ApiResult(200,"success",userInfoList.size());
+            Optional<String> optionalUpdateYn = Optional.ofNullable(updateYn);
+            if(optionalUpdateYn.isPresent()){
+                if(optionalUpdateYn.get().equals("Y") || optionalUpdateYn.get().equals("N") ){
+                    userInfoRepository.deleteUserInfosByUpdateYn(updateYn);
+                    return new ApiResult(200,"success",null);
+                }
+                else {
+                    return new ApiResult(400,"파라미터 값이 올바르지 않습니다. (Y/N만 허용)","입력 값 updateYn : " + updateYn);
+                }
+            }
+            else {
+                userInfoRepository.deleteAll();
+                return new ApiResult(200,"success",null);
+            }
+
         }catch (Exception e){
-            return new ApiResult(500,e.getMessage(),userInfoList.size());
+            return new ApiResult(500,e.getMessage(),null);
         }
 
     }

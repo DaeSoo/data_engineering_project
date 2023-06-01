@@ -4,10 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import riot.api.data.engineer.apiresult.ApiResult;
-import riot.api.data.engineer.entity.UserInfo;
 import riot.api.data.engineer.entity.api.ApiInfo;
 import riot.api.data.engineer.entity.api.ApiKey;
 import riot.api.data.engineer.service.ApiInfoService;
@@ -36,17 +34,14 @@ public class UserInfoController {
     }
 
     @DeleteMapping("/user/entries")
-    public ResponseEntity<ApiResult> userEntriesDelete() {
+    public ResponseEntity<ApiResult> userEntriesDeleteByUpdateYn(@RequestParam(required = false,name = "updateYn") String updateYn) {
         try{
-            List<UserInfo> userInfoList = userInfoService.findUserInfoListAll();
-            if(CollectionUtils.isEmpty(userInfoList)){
-                return new ResponseEntity<>(new ApiResult(404,"List is Empty",null), HttpStatus.BAD_REQUEST);
-            }
-            ApiResult apiResult = userInfoService.deleteAll(userInfoList);
+            ApiResult apiResult = userInfoService.deleteAllByUpdateYn(updateYn);
             return new ResponseEntity<>(apiResult,HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(new ApiResult(500,e.getMessage(),null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }
 
