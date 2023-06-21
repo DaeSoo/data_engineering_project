@@ -39,7 +39,8 @@ public class MinioServiceImpl implements MinioService {
                     .object(fileDto.getFile().getOriginalFilename())
                     .stream(fileDto.getFile().getInputStream(), fileDto.getSize(), -1).build());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.info("Upload ERROR : {}",e.getMessage());
+            return null;
         }
         return FileDto.builder()
                 .title(fileDto.getTitle())
@@ -66,7 +67,8 @@ public class MinioServiceImpl implements MinioService {
                     .matchId(matchId)
                     .build();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.info("Upload ERROR : {}",e.getMessage());
+            return null;
         }
     }
 

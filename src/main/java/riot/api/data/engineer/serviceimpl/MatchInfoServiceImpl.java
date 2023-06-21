@@ -29,7 +29,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,6 +50,7 @@ public class MatchInfoServiceImpl implements MatchInfoService {
     private final MyProducer myProducer;
     private final MatchInfoQueryRepository matchInfoQueryRepository;
     private final WebClient webClient;
+    private final MinioService minioService;
 
 
     @Override
@@ -184,7 +189,8 @@ public class MatchInfoServiceImpl implements MatchInfoService {
                     EpochTimestampConverter epochTimestampConverter = new EpochTimestampConverter(matchDetail.getInfo().getGameStartTimestamp());
                     matchDetail.setCollectDate(epochTimestampConverter.convertToDateString());
                     String processedResponse = gson.toJson(matchDetail);
-
+                    /**** 원천 데이터 전송 ****/
+                    minioService.save(minioService.uploadInputStream(matchInfo.getId(), response));
                     myProducer.sendMessage(kafkaInfo, processedResponse);
                     matchInfo.setCollectCompleteYn(true);
                     matchInfoSave(matchInfo);
